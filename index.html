@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบคลังวัสดุและสายอากาศอัจฉริยะ | Lab Management</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -42,7 +47,6 @@
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
         
-        /* ลูกเล่นความละมุนตา */
         .glass-card {
             background: linear-gradient(135deg, rgba(19, 28, 46, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
             backdrop-filter: blur(10px);
@@ -56,16 +60,16 @@
 </head>
 <body class="bg-darkbg text-slate-200 min-h-screen font-sans selection:bg-sky-500 selection:text-white">
 
-    <div class="max-w-6xl mx-auto p-4 sm:p-6" x-data="app()" x-init="initChart()">
+    <div class="max-w-6xl mx-auto p-4 sm:p-6" x-data="app()" x-init="initData()">
         <!-- Header & Navigation Tabs -->
         <header class="glass-card rounded-2xl p-4 sm:p-5 mb-6 flex flex-col sm:flex-row justify-between items-center no-print">
             <div class="flex items-center space-x-3.5 mb-4 sm:mb-0">
                 <div class="p-3 bg-gradient-to-br from-sky-500/20 to-blue-600/10 border border-sky-500/30 rounded-xl text-sky-400 shadow-inner">
-                    📡📡
+                    📡
                 </div>
                 <div>
                     <h1 class="text-sm sm:text-base font-bold tracking-wider text-slate-100">ANTENNA LAB SYSTEM</h1>
-                    <p class="text-xs text-slate-400">ระบบบริหารจัดการคลังอุปกรณ์วิศวกรรม</p>
+                    <p class="text-xs text-slate-400">ระบบบริหารจัดการคลังอุปกรณ์วิศวกรรม (Real-time Sync)</p>
                 </div>
             </div>
             
@@ -159,11 +163,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[11px] font-medium text-slate-400 mb-1">ชื่อผู้เบิก / รหัสประจำตัว</label>
-                        <input type="text" x-model="checkoutForm.userName" required class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition" placeholder="กรอกชื่อ-นามสกุล">
+                        <input type="text" x-model="checkoutForm.userName" required class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none" placeholder="กรอกชื่อ-นามสกุล">
                     </div>
                     <div>
                         <label class="block text-[11px] font-medium text-slate-400 mb-1">เลือกรายการอุปกรณ์</label>
-                        <select x-model="checkoutForm.materialId" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition">
+                        <select x-model="checkoutForm.materialId" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none">
                             <template x-for="item in materials" :key="item.id">
                                 <option :value="item.id" x-text="item.name + ' [คงเหลือ: ' + item.quantity + ' ' + item.unit + ']'"></option>
                             </template>
@@ -229,7 +233,7 @@
                                 <td class="px-3 py-3 text-slate-300" x-text="tx.materialName"></td>
                                 <td class="px-3 py-3 text-center font-semibold text-amber-400" x-text="tx.quantity + ' ' + tx.unit"></td>
                                 <td class="px-3 py-3 text-center">
-                                    <button @click="returnItem(tx.id)" class="text-xs bg-sky-500/10 border border-sky-500/20 text-sky-400 px-3 py-1 rounded-lg hover:bg-sky-500 hover:text-slate-950 font-medium transition">📥 รับคืน</button>
+                                    <button @click="returnItem(tx)" class="text-xs bg-sky-500/10 border border-sky-500/20 text-sky-400 px-3 py-1 rounded-lg hover:bg-sky-500 hover:text-slate-950 font-medium transition">📥 รับคืน</button>
                                 </td>
                             </tr>
                         </template>
@@ -310,7 +314,7 @@
                                         <span :class="item.quantity <= item.minQty ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'" class="px-2.5 py-0.5 rounded-md text-[11px] font-medium" x-text="item.quantity <= item.minQty ? 'ใกล้หมด' : 'ปกติ'"></span>
                                     </td>
                                     <td class="px-3 py-3 text-center">
-                                        <button @click="restockItem(item.id)" class="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1 rounded-lg hover:bg-emerald-500 hover:text-slate-950 font-medium transition">+ เติมของ</button>
+                                        <button @click="restockItem(item)" class="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1 rounded-lg hover:bg-emerald-500 hover:text-slate-950 font-medium transition">+ เติมของ</button>
                                     </td>
                                 </tr>
                             </template>
@@ -435,26 +439,32 @@
     </div>
 
     <script>
+        // ตั้งค่า Firebase ของคุณ
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOR7y1n5N3dt0XsaQ-09ci9-mLgsSrWvw",
+            authDomain: "stockitem-312d1.firebaseapp.com",
+            projectId: "stockitem-312d1",
+            storageBucket: "stockitem-312d1.firebasestorage.app",
+            messagingSenderId: "937360235650",
+            appId: "1:937360235650:web:7f589594c457c4d099289b",
+            measurementId: "G-71ENDX85N7"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         let chartInstance = null;
 
         function app() {
             return {
                 tab: 'dashboard',
                 searchQuery: '',
-                materials: [
-                    { id: 1, name: 'N-Male Connector (RG58)', category: 'Connectors', unit: 'ชิ้น', quantity: 30, minQty: 5, type: 'consumable' },
-                    { id: 2, name: 'N-Female Bulkhead Connector', category: 'Connectors', unit: 'ชิ้น', quantity: 3, minQty: 5, type: 'consumable' },
-                    { id: 3, name: 'SMA to N-Male Adapter', category: 'Adapters', unit: 'ชิ้น', quantity: 15, minQty: 3, type: 'consumable' },
-                    { id: 4, name: 'สายนำสัญญาณ RG-58 Coaxial', category: 'Cables', unit: 'เมตร', quantity: 120, minQty: 25, type: 'consumable' },
-                    { id: 5, name: 'สายนำสัญญาณ RG-213 Coaxial', category: 'Cables', unit: 'เมตร', quantity: 18, minQty: 30, type: 'consumable' },
-                    { id: 6, name: 'สายนำสัญญาณ RG-174 Coaxial', category: 'Cables', unit: 'เมตร', quantity: 50, minQty: 10, type: 'consumable' },
-                    { id: 7, name: 'คีมย้ำหัวต่อ Coaxial Crimp Tool', category: 'Tools', unit: 'ชุด', quantity: 2, minQty: 1, type: 'returnable' }
-                ],
+                materials: [],
                 history: [],
                 restockLogs: [],
                 checkoutForm: {
                     userName: '',
-                    materialId: 1,
+                    materialId: '',
                     quantity: 1,
                     date: new Date().toISOString().slice(0, 16),
                     note: '',
@@ -501,20 +511,45 @@
                     sorted.sort((a, b) => b.count - a.count);
                     return sorted.slice(0, 3);
                 },
-                init() {
+                initData() {
                     navigator.mediaDevices.getUserMedia({ video: true })
                         .then(stream => { document.getElementById('video').srcObject = stream; })
                         .catch(err => { console.warn("ไม่สามารถเปิดกล้องได้: ", err); });
+
+                    // Real-time listener: Materials
+                    db.collection("materials").onSnapshot(snapshot => {
+                        this.materials = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                        if(this.materials.length > 0 && !this.checkoutForm.materialId) {
+                            this.checkoutForm.materialId = this.materials[0].id;
+                        }
+                    });
+
+                    // Real-time listener: History
+                    db.collection("history").orderBy("id", "desc").onSnapshot(snapshot => {
+                        this.history = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                        this.updateChart();
+                    });
+
+                    // Real-time listener: Restock Logs
+                    db.collection("restockLogs").orderBy("id", "desc").onSnapshot(snapshot => {
+                        this.restockLogs = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                    });
+
+                    this.initChart();
                 },
                 initChart() {
-                    const ctx = document.getElementById('monthlyChart').getContext('2d');
+                    const canvasEl = document.getElementById('monthlyChart');
+                    if (!canvasEl) return;
+                    const ctx = canvasEl.getContext('2d');
+                    if (chartInstance) chartInstance.destroy();
+
                     chartInstance = new Chart(ctx, {
                         type: 'bar',
                         data: {
                             labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
                             datasets: [{
                                 label: 'จำนวนครั้งที่มีการเบิก-จ่าย',
-                                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                data: Array(12).fill(0),
                                 backgroundColor: 'rgba(14, 165, 233, 0.8)',
                                 borderColor: '#0ea5e9',
                                 borderWidth: 1,
@@ -533,6 +568,7 @@
                             }
                         }
                     });
+                    this.updateChart();
                 },
                 updateChart() {
                     if (!chartInstance) return;
@@ -552,7 +588,7 @@
                     context.drawImage(video, 0, 0, 260, 195);
                     this.checkoutForm.image = canvas.toDataURL('image/png');
                 },
-                submitCheckout() {
+                async submitCheckout() {
                     if (!this.checkoutForm.image) {
                         alert('กรุณาถ่ายภาพยืนยันตัวตนก่อนกดยืนยัน!');
                         return;
@@ -566,7 +602,7 @@
                         return;
                     }
 
-                    item.quantity -= qty;
+                    let newQty = item.quantity - qty;
                     let txStatus = item.type === 'returnable' ? 'borrowed' : 'completed';
 
                     let formattedDate = new Date(this.checkoutForm.date).toLocaleString('th-TH', {
@@ -574,7 +610,11 @@
                         hour: '2-digit', minute: '2-digit'
                     });
 
-                    this.history.unshift({
+                    // อัปเดตจำนวนใน Firestore (ตาราง materials)
+                    await db.collection("materials").doc(item.docId).update({ quantity: newQty });
+
+                    // บันทึกประวัติลง Firestore (ตาราง history)
+                    await db.collection("history").add({
                         id: Date.now(),
                         rawDate: this.checkoutForm.date,
                         date: formattedDate,
@@ -587,7 +627,6 @@
                         image: this.checkoutForm.image
                     });
 
-                    this.updateChart();
                     alert('ทำรายการสำเร็จ!');
                     this.checkoutForm.userName = '';
                     this.checkoutForm.quantity = 1;
@@ -596,19 +635,19 @@
                     this.checkoutForm.date = new Date().toISOString().slice(0, 16);
                     this.tab = 'dashboard';
                 },
-                returnItem(id) {
-                    let tx = this.history.find(h => h.id === id);
+                async returnItem(tx) {
                     let item = this.materials.find(m => m.name === tx.materialName);
-                    
                     if (item) {
-                        item.quantity += tx.quantity;
+                        let newQty = item.quantity + tx.quantity;
+                        await db.collection("materials").doc(item.docId).update({ quantity: newQty });
                     }
-                    tx.status = 'returned';
+                    await db.collection("history").doc(tx.docId).update({ status: 'returned' });
                     alert('รับคืนอุปกรณ์เรียบร้อยแล้ว!');
                 },
-                addMaterial() {
-                    this.materials.push({
-                        id: Date.now(),
+                async addMaterial() {
+                    let newId = Date.now();
+                    await db.collection("materials").add({
+                        id: newId,
                         name: this.newMaterial.name,
                         category: this.newMaterial.category,
                         unit: this.newMaterial.unit,
@@ -621,17 +660,18 @@
                     this.newMaterial.quantity = '';
                     this.newMaterial.minQty = 5;
                 },
-                restockItem(id) {
-                    let item = this.materials.find(m => m.id === id);
+                async restockItem(item) {
                     let userName = prompt('กรุณากรอกชื่อผู้เติมสต็อก:');
                     if (!userName) return;
 
                     let addQty = prompt(`กรอกจำนวนที่ต้องการเติมเพิ่ม (หน่วยเป็น ${item.unit}):`);
                     if (addQty && !isNaN(addQty) && parseInt(addQty) > 0) {
                         let qtyNum = parseInt(addQty);
-                        item.quantity += qtyNum;
+                        let newQty = item.quantity + qtyNum;
 
-                        this.restockLogs.unshift({
+                        await db.collection("materials").doc(item.docId).update({ quantity: newQty });
+
+                        await db.collection("restockLogs").add({
                             id: Date.now(),
                             date: new Date().toLocaleString('th-TH', {
                                 year: 'numeric', month: 'numeric', day: 'numeric',
