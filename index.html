@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคลังวัสดุและสายอากาศอัจฉริยะ | Lab Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#090d16',
+                        cardbg: '#131c2e',
+                        bordercolor: '#1e293b',
+                        accent: '#0ea5e9'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @media print {
+            body { background-color: #ffffff !important; color: #000000 !important; }
+            body * { visibility: hidden; }
+            #printable-history, #printable-history * { visibility: visible; }
+            #printable-history {
+                position: absolute; left: 0; top: 0; width: 100%;
+                color: #000 !important; background: #fff !important; border: none !important; box-shadow: none !important;
+            }
+            #printable-history th { background-color: #f1f5f9 !important; color: #000 !important; border-bottom: 2px solid #333 !important; }
+            #printable-history td { border-bottom: 1px solid #cbd5e1 !important; color: #1e293b !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+        .print-only { display: none; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        
+        /* ลูกเล่นความละมุนตา */
+        .glass-card {
+            background: linear-gradient(135deg, rgba(19, 28, 46, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+        }
+        .nav-glow {
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-darkbg text-slate-200 min-h-screen font-sans selection:bg-sky-500 selection:text-white">
+
+    <div class="max-w-6xl mx-auto p-4 sm:p-6" x-data="app()" x-init="initChart()">
+        <!-- Header & Navigation Tabs -->
+        <header class="glass-card rounded-2xl p-4 sm:p-5 mb-6 flex flex-col sm:flex-row justify-between items-center no-print">
+            <div class="flex items-center space-x-3.5 mb-4 sm:mb-0">
+                <div class="p-3 bg-gradient-to-br from-sky-500/20 to-blue-600/10 border border-sky-500/30 rounded-xl text-sky-400 shadow-inner">
+                    📡📡
+                </div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-bold tracking-wider text-slate-100">ANTENNA LAB SYSTEM</h1>
+                    <p class="text-xs text-slate-400">ระบบบริหารจัดการคลังอุปกรณ์วิศวกรรม</p>
+                </div>
+            </div>
+            
+            <nav class="flex flex-wrap gap-1 bg-slate-950/60 p-1.5 rounded-xl border border-slate-800/80">
+                <template x-for="item in [
+                    { id: 'dashboard', label: 'แดชบอร์ด', icon: '📊' },
+                    { id: 'checkout', label: 'เบิก/ยืมของ', icon: '📤' },
+                    { id: 'return', label: 'คืนอุปกรณ์', icon: '📥' },
+                    { id: 'inventory', label: 'จัดการคลัง', icon: '📦' },
+                    { id: 'history', label: 'ประวัติ', icon: '📜' }
+                ]">
+                    <button @click="tab = item.id; if(item.id==='dashboard') $nextTick(() => updateChart())" 
+                        :class="tab === item.id ? 'bg-sky-500 text-slate-950 font-semibold nav-glow' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'" 
+                        class="px-3.5 py-1.5 rounded-lg text-xs transition-all duration-200 flex items-center gap-1.5">
+                        <span x-text="item.icon"></span>
+                        <span x-text="item.label"></span>
+                    </button>
+                </template>
+            </nav>
+        </header>
+
+        <!-- TAB 0: แดชบอร์ด -->
+        <div x-show="tab === 'dashboard'" class="space-y-6" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+            <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                <template x-for="stat in [
+                    { label: 'วัสดุทั้งหมด', val: materials.length, border: 'border-l-sky-500', text: 'text-slate-100' },
+                    { label: 'ใกล้หมด (Low Stock)', val: materials.filter(m => m.quantity <= m.minQty).length, border: 'border-l-rose-500', text: 'text-rose-400' },
+                    { label: 'ค้างยืมเครื่องมือ', val: history.filter(h => h.status === 'borrowed').length, border: 'border-l-amber-500', text: 'text-amber-400' },
+                    { label: 'รายการเบิกทั้งหมด', val: history.length, border: 'border-l-emerald-500', text: 'text-emerald-400' },
+                    { label: 'หมวดหมู่', val: categories.length, border: 'border-l-indigo-500', text: 'text-indigo-400' },
+                    { label: 'ผู้ใช้งานระบบ', val: uniqueUsersCount, border: 'border-l-purple-500', text: 'text-purple-400' }
+                ]">
+                    <div class="glass-card p-4 rounded-xl border-l-4 transition-transform duration-200 hover:-translate-y-0.5" :class="stat.border">
+                        <p class="text-[11px] text-slate-400 font-medium" x-text="stat.label"></p>
+                        <h3 class="text-xl font-bold mt-1" :class="stat.text" x-text="stat.val"></h3>
+                    </div>
+                </template>
+            </div>
+
+            <!-- กราฟสถิติ -->
+            <div class="glass-card p-5 rounded-2xl">
+                <h2 class="text-xs font-semibold text-slate-300 border-b border-slate-800 pb-3 mb-4 flex items-center gap-2">
+                    <span class="text-sky-400">📈</span> สถิติการเบิก-จ่ายอุปกรณ์รายเดือน (ภาพรวมประจำปี)
+                </h2>
+                <div class="relative h-64 w-full">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="glass-card p-5 rounded-2xl">
+                    <h2 class="text-xs font-semibold text-slate-300 border-b border-slate-800 pb-3 mb-3 flex items-center gap-2">
+                        <span class="text-amber-400">🔥</span> อุปกรณ์ที่มีการเบิกสูงสุด
+                    </h2>
+                    <div class="space-y-2">
+                        <template x-for="(item, index) in topDemandedItems" :key="index">
+                            <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/60">
+                                <span class="text-xs text-slate-300" x-text="(index + 1) + '. ' + item.name"></span>
+                                <span class="text-[11px] bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium px-2 py-0.5 rounded-md" x-text="item.total + ' ครั้ง'"></span>
+                            </div>
+                        </template>
+                        <template x-if="topDemandedItems.length === 0">
+                            <p class="text-xs text-slate-500 text-center py-4">ยังไม่มีข้อมูลการเบิก</p>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl">
+                    <h2 class="text-xs font-semibold text-slate-300 border-b border-slate-800 pb-3 mb-3 flex items-center gap-2">
+                        <span class="text-purple-400">🏆</span> ผู้ใช้งานที่เบิกบ่อยที่สุด
+                    </h2>
+                    <div class="space-y-2">
+                        <template x-for="(user, index) in topBorrowers" :key="index">
+                            <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/60">
+                                <span class="text-xs text-slate-300" x-text="(index + 1) + '. ' + user.name"></span>
+                                <span class="text-[11px] bg-purple-500/10 text-purple-400 border border-purple-500/20 font-medium px-2 py-0.5 rounded-md" x-text="user.count + ' ครั้ง'"></span>
+                            </div>
+                        </template>
+                        <template x-if="topBorrowers.length === 0">
+                            <p class="text-xs text-slate-500 text-center py-4">ยังไม่มีข้อมูลผู้ใช้งาน</p>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: เบิก/ยืมอุปกรณ์ -->
+        <div x-show="tab === 'checkout'" class="glass-card p-6 rounded-2xl space-y-4" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+            <h2 class="text-xs font-semibold text-slate-300 border-b border-slate-800 pb-3">ฟอร์มทำรายการเบิก / ยืมอุปกรณ์</h2>
+            <form @submit.prevent="submitCheckout" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">ชื่อผู้เบิก / รหัสประจำตัว</label>
+                        <input type="text" x-model="checkoutForm.userName" required class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition" placeholder="กรอกชื่อ-นามสกุล">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">เลือกรายการอุปกรณ์</label>
+                        <select x-model="checkoutForm.materialId" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition">
+                            <template x-for="item in materials" :key="item.id">
+                                <option :value="item.id" x-text="item.name + ' [คงเหลือ: ' + item.quantity + ' ' + item.unit + ']'"></option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">จำนวน</label>
+                        <div class="relative mt-1">
+                            <input type="number" x-model="checkoutForm.quantity" min="1" required class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 pr-14 text-xs text-slate-200 focus:border-sky-500 focus:outline-none">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none bg-slate-900 px-2.5 rounded-r-xl border-l border-slate-800 text-[11px] text-sky-400" x-text="selectedUnit"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">วันที่และเวลา</label>
+                        <input type="datetime-local" x-model="checkoutForm.date" required class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">วัตถุประสงค์การใช้</label>
+                        <input type="text" x-model="checkoutForm.note" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none" placeholder="เช่น ประกอบสายอากาศ Dipole">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">ถ่ายภาพยืนยันตัวตนก่อนเบิก (บังคับ)</label>
+                    <div class="flex flex-col items-center bg-slate-950/40 p-4 rounded-xl border border-slate-800/80">
+                        <video id="video" width="260" height="195" autoplay class="rounded-lg mb-3 bg-black object-cover border border-slate-800 shadow-sm"></video>
+                        <button type="button" @click="takeSnapshot" class="bg-sky-600 hover:bg-sky-500 text-slate-950 font-semibold px-4 py-1.5 rounded-lg text-xs transition shadow-sm">📸 ถ่ายภาพยืนยัน</button>
+                        <canvas id="canvas" width="260" height="195" class="hidden"></canvas>
+                        
+                        <div class="mt-3" x-show="checkoutForm.image">
+                            <p class="text-[11px] text-emerald-400 mb-1 text-center font-medium">✓ บันทึกภาพยืนยันเรียบร้อย</p>
+                            <img :src="checkoutForm.image" alt="Proof" class="rounded-lg border border-slate-700 w-24 h-16 object-cover shadow" />
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white p-3 rounded-xl font-medium text-xs transition shadow-sm">ยืนยันทำรายการเบิกของ</button>
+            </form>
+        </div>
+
+        <!-- TAB 2: คืนอุปกรณ์ -->
+        <div x-show="tab === 'return'" class="glass-card p-6 rounded-2xl space-y-4" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-1">
+            <h2 class="text-xs font-semibold text-slate-300 border-b border-slate-800 pb-3">คืนอุปกรณ์เครื่องมือ (รายการที่ค้างยืม)</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-800 text-xs">
+                    <thead>
+                        <tr class="text-slate-400 uppercase tracking-wider">
+                            <th class="px-3 py-3 text-left font-medium">วันที่ยืม</th>
+                            <th class="px-3 py-3 text-left font-medium">ผู้ยืม</th>
+                            <th class="px-3 py-3 text-left font-medium">รายการอุปกรณ์</th>
+                            <th class="px-3 py-3 text-center font-medium">จำนวน</th>
+                            <th class="px-3 py-3 text-center font-medium">การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/40">
+                        <template x-for="tx in history.filter(h => h.status === 'borrowed' && h.type === 'returnable')" :key="tx.id">
+                            <tr class="hover:bg-slate-800/20 transition">
+                                <td class="px-3 py-3 text-slate-400" x-text="tx.date"></td>
+                                <td class="px-3 py-3 font-medium text-slate-200" x-text="tx.userName"></td>
+                                <td class="px-3 py-3 text-slate-300" x-text="tx.materialName"></td>
+                                <td class="px-3 py-3 text-center font-semibold text-amber-400" x-text="tx.quantity + ' ' + tx.unit"></td>
+                                <td class="px-3 py-3 text-center">
+                                    <button @click="returnItem(tx.id)" class="text-xs bg-sky-500/10 border border-sky-500/20 text-sky-400 px-3 py-1 rounded-lg hover:bg-sky-500 hover:text-slate-950 font-medium transition">📥 รับคืน</button>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="history.filter(h => h.status === 'borrowed' && h.type === 'returnable').length === 0">
+                            <tr>
+                                <td colspan="5" class="text-center py-8 text-xs text-slate-500">ไม่มีอุปกรณ์ที่ค้างส่งคืนในขณะนี้</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: จัดการคลัง -->
+        <div x-show="tab === 'inventory'" class="space-y-5" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-1">
+            <div class="glass-card p-6 rounded-2xl">
+                <h2 class="text-xs font-semibold text-slate-300 border-b border-slate-800 pb-3 mb-4">➕ เพิ่มวัสดุ / สายสัญญาณเข้าสู่คลัง</h2>
+                <form @submit.prevent="addMaterial" class="grid grid-cols-1 sm:grid-cols-5 gap-3.5">
+                    <div class="sm:col-span-2">
+                        <input type="text" x-model="newMaterial.name" required placeholder="ชื่อวัสดุ (เช่น สาย RG-58)" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <select x-model="newMaterial.category" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none">
+                            <option value="Connectors">Connectors (หัวต่อ)</option>
+                            <option value="Cables">Cables (สายนำสัญญาณ)</option>
+                            <option value="Tools">Tools (เครื่องมือ)</option>
+                            <option value="Adapters">Adapters (ตัวแปลง)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select x-model="newMaterial.unit" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none">
+                            <option value="ชิ้น">ชิ้น</option>
+                            <option value="เมตร">เมตร</option>
+                            <option value="ชุด">ชุด</option>
+                            <option value="ม้วน">ม้วน</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="number" x-model="newMaterial.quantity" min="1" required placeholder="จำนวนเริ่มต้น" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <input type="number" x-model="newMaterial.minQty" min="0" required placeholder="แจ้งเตือนขั้นต่ำ" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <select x-model="newMaterial.type" class="w-full bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-sky-500 focus:outline-none">
+                            <option value="consumable">ใช้แล้วหมดไป</option>
+                            <option value="returnable">ยืม-คืน (เครื่องมือ)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="sm:col-span-4 bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 rounded-xl font-medium text-xs transition shadow-sm">บันทึกเพิ่มลงคลัง</button>
+                </form>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <h2 class="text-xs font-semibold text-slate-300">📦 รายการวัสดุและอุปกรณ์ในคลังปัจจุบัน</h2>
+                    <input type="text" x-model="searchQuery" placeholder="🔍 ค้นหาชื่ออุปกรณ์..." class="bg-slate-950/60 rounded-xl border border-slate-800 p-2.5 text-xs text-slate-200 w-full sm:w-64 focus:border-sky-500 focus:outline-none">
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800 text-xs">
+                        <thead>
+                            <tr class="text-slate-400 uppercase tracking-wider">
+                                <th class="px-3 py-3 text-left font-medium">ชื่ออุปกรณ์</th>
+                                <th class="px-3 py-3 text-left font-medium">หมวดหมู่</th>
+                                <th class="px-3 py-3 text-center font-medium">คงเหลือ</th>
+                                <th class="px-3 py-3 text-center font-medium">สถานะสต็อก</th>
+                                <th class="px-3 py-3 text-center font-medium">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/40">
+                            <template x-for="item in filteredMaterials" :key="item.id">
+                                <tr class="hover:bg-slate-800/20 transition">
+                                    <td class="px-3 py-3 font-medium text-slate-200" x-text="item.name"></td>
+                                    <td class="px-3 py-3 text-slate-400" x-text="item.category"></td>
+                                    <td class="px-3 py-3 text-center font-semibold text-sky-400" x-text="item.quantity + ' ' + item.unit"></td>
+                                    <td class="px-3 py-3 text-center">
+                                        <span :class="item.quantity <= item.minQty ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'" class="px-2.5 py-0.5 rounded-md text-[11px] font-medium" x-text="item.quantity <= item.minQty ? 'ใกล้หมด' : 'ปกติ'"></span>
+                                    </td>
+                                    <td class="px-3 py-3 text-center">
+                                        <button @click="restockItem(item.id)" class="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1 rounded-lg hover:bg-emerald-500 hover:text-slate-950 font-medium transition">+ เติมของ</button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ประวัติการเติมสต็อก -->
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+                <h2 class="text-xs font-semibold text-slate-300 border-b border-slate-800 pb-3">📥 ประวัติการเติมสต็อกเข้าคลัง</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800 text-xs">
+                        <thead>
+                            <tr class="text-slate-400 uppercase tracking-wider">
+                                <th class="px-3 py-3 text-left font-medium">เวลา</th>
+                                <th class="px-3 py-3 text-left font-medium">ผู้เติมสต็อก</th>
+                                <th class="px-3 py-3 text-left font-medium">รายการวัสดุ</th>
+                                <th class="px-3 py-3 text-center font-medium">จำนวนที่เพิ่ม</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/40">
+                            <template x-for="log in restockLogs" :key="log.id">
+                                <tr class="hover:bg-slate-800/20 transition">
+                                    <td class="px-3 py-3 text-slate-400" x-text="log.date"></td>
+                                    <td class="px-3 py-3 font-medium text-slate-200" x-text="log.userName"></td>
+                                    <td class="px-3 py-3 text-slate-300" x-text="log.materialName"></td>
+                                    <td class="px-3 py-3 text-center font-semibold text-emerald-400" x-text="'+' + log.quantity + ' ' + log.unit"></td>
+                                </tr>
+                            </template>
+                            <template x-if="restockLogs.length === 0">
+                                <tr>
+                                    <td colspan="4" class="text-center py-6 text-xs text-slate-500">ยังไม่มีประวัติการเติมสต็อก</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: ประวัติ -->
+        <div x-show="tab === 'history'" class="glass-card p-6 rounded-2xl space-y-4" id="printable-history" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-1">
+            <div class="flex flex-col sm:flex-row justify-between items-center border-b border-slate-800 pb-3 gap-2">
+                <h2 class="text-xs font-semibold text-slate-300">
+                    <span class="no-print">📜 ประวัติการเบิก-จ่าย และภาพถ่ายยืนยันตัวตน</span>
+                    <span class="print-only text-sm font-bold text-slate-900">📜 ประวัติการเบิก-จ่ายอุปกรณ์ห้องปฏิบัติการ</span>
+                </h2>
+                <div class="flex gap-2 no-print">
+                    <button @click="exportExcel" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1 transition">
+                        📊 Export Excel
+                    </button>
+                    <button @click="exportPDF" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1 transition border border-slate-700">
+                        📄 พิมพ์ / Save PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-800 text-xs">
+                    <thead>
+                        <tr class="text-slate-400 uppercase tracking-wider">
+                            <th class="px-3 py-3 text-left font-medium">เวลา</th>
+                            <th class="px-3 py-3 text-left font-medium">ผู้ทำรายการ</th>
+                            <th class="px-3 py-3 text-left font-medium">รายการ</th>
+                            <th class="px-3 py-3 text-center font-medium">จำนวน</th>
+                            <th class="px-3 py-3 text-center font-medium">สถานะ</th>
+                            <th class="px-3 py-3 text-center font-medium no-print">ภาพยืนยัน</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/40">
+                        <template x-for="tx in history" :key="tx.id">
+                            <tr class="hover:bg-slate-800/20 transition">
+                                <td class="px-3 py-3 text-slate-400" x-text="tx.date"></td>
+                                <td class="px-3 py-3 font-medium text-slate-200" x-text="tx.userName"></td>
+                                <td class="px-3 py-3 text-slate-300" x-text="tx.materialName"></td>
+                                <td class="px-3 py-3 text-center font-semibold" :class="tx.status === 'returned' ? 'text-emerald-400' : 'text-rose-400'" x-text="tx.status === 'returned' ? 'คืนแล้ว' : '-' + tx.quantity + ' ' + tx.unit"></td>
+                                <td class="px-3 py-3 text-center">
+                                    <span class="px-2.5 py-0.5 rounded-md text-[11px] font-medium" 
+                                          :class="{
+                                              'bg-rose-500/10 text-rose-400 border border-rose-500/20': tx.status === 'borrowed',
+                                              'bg-sky-500/10 text-sky-400 border border-sky-500/20': tx.status === 'completed',
+                                              'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': tx.status === 'returned'
+                                          }"
+                                          x-text="{
+                                              'borrowed': 'ค้างยืม',
+                                              'completed': 'เบิกสำเร็จ',
+                                              'returned': 'คืนแล้ว'
+                                          }[tx.status]">
+                                    </span>
+                                </td>
+                                <td class="px-3 py-3 text-center no-print">
+                                    <img :src="tx.image" alt="Proof" class="w-10 h-7 object-cover rounded border border-slate-700 mx-auto cursor-pointer hover:scale-150 transition shadow-sm">
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="history.length === 0">
+                            <tr>
+                                <td colspan="6" class="text-center py-8 text-xs text-slate-500">ยังไม่มีประวัติการทำรายการ</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ส่วนช่องลายเซ็นสำหรับโหมดพิมพ์ PDF -->
+            <div class="print-only mt-12 pt-6 text-slate-900 text-xs">
+                <div class="grid grid-cols-2 gap-10 text-center">
+                    <div class="space-y-10">
+                        <p>ลงชื่อ............................................................ผู้เบิก/ผู้ยืม</p>
+                        <p>(............................................................)</p>
+                        <p>วันที่ ......./......./.......</p>
+                    </div>
+                    <div class="space-y-10">
+                        <p>ลงชื่อ............................................................ผู้ตรวจสอบ/ผู้จ่ายของ</p>
+                        <p>(............................................................)</p>
+                        <p>วันที่ ......./......./.......</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+
+        function app() {
+            return {
+                tab: 'dashboard',
+                searchQuery: '',
+                materials: [
+                    { id: 1, name: 'N-Male Connector (RG58)', category: 'Connectors', unit: 'ชิ้น', quantity: 30, minQty: 5, type: 'consumable' },
+                    { id: 2, name: 'N-Female Bulkhead Connector', category: 'Connectors', unit: 'ชิ้น', quantity: 3, minQty: 5, type: 'consumable' },
+                    { id: 3, name: 'SMA to N-Male Adapter', category: 'Adapters', unit: 'ชิ้น', quantity: 15, minQty: 3, type: 'consumable' },
+                    { id: 4, name: 'สายนำสัญญาณ RG-58 Coaxial', category: 'Cables', unit: 'เมตร', quantity: 120, minQty: 25, type: 'consumable' },
+                    { id: 5, name: 'สายนำสัญญาณ RG-213 Coaxial', category: 'Cables', unit: 'เมตร', quantity: 18, minQty: 30, type: 'consumable' },
+                    { id: 6, name: 'สายนำสัญญาณ RG-174 Coaxial', category: 'Cables', unit: 'เมตร', quantity: 50, minQty: 10, type: 'consumable' },
+                    { id: 7, name: 'คีมย้ำหัวต่อ Coaxial Crimp Tool', category: 'Tools', unit: 'ชุด', quantity: 2, minQty: 1, type: 'returnable' }
+                ],
+                history: [],
+                restockLogs: [],
+                checkoutForm: {
+                    userName: '',
+                    materialId: 1,
+                    quantity: 1,
+                    date: new Date().toISOString().slice(0, 16),
+                    note: '',
+                    image: ''
+                },
+                newMaterial: {
+                    name: '',
+                    category: 'Connectors',
+                    unit: 'ชิ้น',
+                    quantity: '',
+                    minQty: 5,
+                    type: 'consumable'
+                },
+                get selectedUnit() {
+                    let item = this.materials.find(m => m.id == this.checkoutForm.materialId);
+                    return item ? item.unit : '';
+                },
+                get filteredMaterials() {
+                    if (!this.searchQuery) return this.materials;
+                    return this.materials.filter(m => m.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+                },
+                get categories() {
+                    return [...new Set(this.materials.map(m => m.category))];
+                },
+                get uniqueUsersCount() {
+                    let users = this.history.map(h => h.userName);
+                    return [...new Set(users)].length;
+                },
+                get topDemandedItems() {
+                    let counts = {};
+                    this.history.forEach(h => {
+                        counts[h.materialName] = (counts[h.materialName] || 0) + parseInt(h.quantity);
+                    });
+                    let sorted = Object.keys(counts).map(name => ({ name, total: counts[name] }));
+                    sorted.sort((a, b) => b.total - a.total);
+                    return sorted.slice(0, 3);
+                },
+                get topBorrowers() {
+                    let counts = {};
+                    this.history.forEach(h => {
+                        counts[h.userName] = (counts[h.userName] || 0) + 1;
+                    });
+                    let sorted = Object.keys(counts).map(name => ({ name, count: counts[name] }));
+                    sorted.sort((a, b) => b.count - a.count);
+                    return sorted.slice(0, 3);
+                },
+                init() {
+                    navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(stream => { document.getElementById('video').srcObject = stream; })
+                        .catch(err => { console.warn("ไม่สามารถเปิดกล้องได้: ", err); });
+                },
+                initChart() {
+                    const ctx = document.getElementById('monthlyChart').getContext('2d');
+                    chartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+                            datasets: [{
+                                label: 'จำนวนครั้งที่มีการเบิก-จ่าย',
+                                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                backgroundColor: 'rgba(14, 165, 233, 0.8)',
+                                borderColor: '#0ea5e9',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: '#94a3b8', font: { family: 'sans-serif', size: 11 } } }
+                            },
+                            scales: {
+                                x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(30, 41, 59, 0.5)' } },
+                                y: { beginAtZero: true, ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: 'rgba(30, 41, 59, 0.5)' } }
+                            }
+                        }
+                    });
+                },
+                updateChart() {
+                    if (!chartInstance) return;
+                    let monthlyCounts = Array(12).fill(0);
+                    this.history.forEach(h => {
+                        let dateObj = new Date(h.rawDate || h.date);
+                        let monthIndex = !isNaN(dateObj.getMonth()) ? dateObj.getMonth() : new Date().getMonth();
+                        monthlyCounts[monthIndex] += 1;
+                    });
+                    chartInstance.data.datasets[0].data = monthlyCounts;
+                    chartInstance.update();
+                },
+                takeSnapshot() {
+                    const video = document.getElementById('video');
+                    const canvas = document.getElementById('canvas');
+                    const context = canvas.getContext('2d');
+                    context.drawImage(video, 0, 0, 260, 195);
+                    this.checkoutForm.image = canvas.toDataURL('image/png');
+                },
+                submitCheckout() {
+                    if (!this.checkoutForm.image) {
+                        alert('กรุณาถ่ายภาพยืนยันตัวตนก่อนกดยืนยัน!');
+                        return;
+                    }
+
+                    let item = this.materials.find(m => m.id == this.checkoutForm.materialId);
+                    let qty = parseInt(this.checkoutForm.quantity);
+
+                    if (item.quantity < qty) {
+                        alert('จำนวนในคลังไม่เพียงพอ!');
+                        return;
+                    }
+
+                    item.quantity -= qty;
+                    let txStatus = item.type === 'returnable' ? 'borrowed' : 'completed';
+
+                    let formattedDate = new Date(this.checkoutForm.date).toLocaleString('th-TH', {
+                        year: 'numeric', month: 'numeric', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+
+                    this.history.unshift({
+                        id: Date.now(),
+                        rawDate: this.checkoutForm.date,
+                        date: formattedDate,
+                        userName: this.checkoutForm.userName,
+                        materialName: item.name,
+                        quantity: qty,
+                        unit: item.unit,
+                        type: item.type,
+                        status: txStatus,
+                        image: this.checkoutForm.image
+                    });
+
+                    this.updateChart();
+                    alert('ทำรายการสำเร็จ!');
+                    this.checkoutForm.userName = '';
+                    this.checkoutForm.quantity = 1;
+                    this.checkoutForm.note = '';
+                    this.checkoutForm.image = '';
+                    this.checkoutForm.date = new Date().toISOString().slice(0, 16);
+                    this.tab = 'dashboard';
+                },
+                returnItem(id) {
+                    let tx = this.history.find(h => h.id === id);
+                    let item = this.materials.find(m => m.name === tx.materialName);
+                    
+                    if (item) {
+                        item.quantity += tx.quantity;
+                    }
+                    tx.status = 'returned';
+                    alert('รับคืนอุปกรณ์เรียบร้อยแล้ว!');
+                },
+                addMaterial() {
+                    this.materials.push({
+                        id: Date.now(),
+                        name: this.newMaterial.name,
+                        category: this.newMaterial.category,
+                        unit: this.newMaterial.unit,
+                        quantity: parseInt(this.newMaterial.quantity),
+                        minQty: parseInt(this.newMaterial.minQty),
+                        type: this.newMaterial.type
+                    });
+                    alert('เพิ่มวัสดุใหม่สำเร็จ!');
+                    this.newMaterial.name = '';
+                    this.newMaterial.quantity = '';
+                    this.newMaterial.minQty = 5;
+                },
+                restockItem(id) {
+                    let item = this.materials.find(m => m.id === id);
+                    let userName = prompt('กรุณากรอกชื่อผู้เติมสต็อก:');
+                    if (!userName) return;
+
+                    let addQty = prompt(`กรอกจำนวนที่ต้องการเติมเพิ่ม (หน่วยเป็น ${item.unit}):`);
+                    if (addQty && !isNaN(addQty) && parseInt(addQty) > 0) {
+                        let qtyNum = parseInt(addQty);
+                        item.quantity += qtyNum;
+
+                        this.restockLogs.unshift({
+                            id: Date.now(),
+                            date: new Date().toLocaleString('th-TH', {
+                                year: 'numeric', month: 'numeric', day: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                            }),
+                            userName: userName,
+                            materialName: item.name,
+                            quantity: qtyNum,
+                            unit: item.unit
+                        });
+
+                        alert('เติมสต็อกสำเร็จและบันทึกประวัติแล้ว!');
+                    }
+                },
+                exportExcel() {
+                    if (this.history.length === 0) {
+                        alert('ไม่มีข้อมูลสำหรับ Export');
+                        return;
+                    }
+                    let csv = '\uFEFFเวลา,ผู้ทำรายการ,รายการ,จำนวน,หน่วย,สถานะ\n';
+                    this.history.forEach(h => {
+                        let statusText = h.status === 'borrowed' ? 'ค้างยืม' : (h.status === 'completed' ? 'เบิกสำเร็จ' : 'คืนแล้ว');
+                        csv += `"${h.date}","${h.userName}","${h.materialName}",${h.quantity},"${h.unit}","${statusText}"\n`;
+                    });
+                    let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    let link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.setAttribute('download', 'antenna_lab_history.csv');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                },
+                exportPDF() {
+                    if (this.history.length === 0) {
+                        alert('ไม่มีข้อมูลสำหรับพิมพ์');
+                        return;
+                    }
+                    window.print();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
