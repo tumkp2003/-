@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>JKP Engineering</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- รวมสไตล์ CSS ทั้งหมดไว้ในไฟล์เดียวเพื่อให้จัดการง่าย -->
     <style>
         :root {
             --primary: #0284c7;
@@ -14,6 +15,7 @@
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-color: #1e293b;
+            --border-color: #e2e8f0;
         }
 
         body { 
@@ -26,96 +28,116 @@
         }
 
         .container { 
-            max-width: 850px; 
+            max-width: 900px; 
             background: var(--card-bg); 
-            padding: 30px; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08); 
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
             margin: auto; 
             transition: all 0.3s ease;
         }
 
         .logo-header {
             text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 2px dashed #e2e8f0;
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 2px dashed var(--border-color);
         }
 
+        /* โลโก้จานดาวเทียมและเอฟเฟกต์เรืองแสง */
         .antenna-logo {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             background: linear-gradient(135deg, #0ea5e9, #0369a1);
             border-radius: 50%;
-            box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
-            margin-bottom: 10px;
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.4);
+            margin: 0 auto 12px auto;
             position: relative;
             animation: pulse-glow 3s infinite;
         }
 
         @keyframes pulse-glow {
             0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.5); }
-            70% { box-shadow: 0 0 0 15px rgba(14, 165, 233, 0); }
+            70% { box-shadow: 0 0 0 18px rgba(14, 165, 233, 0); }
             100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
         }
 
         .antenna-icon {
-            font-size: 32px;
+            font-size: 34px;
             color: white;
             position: relative;
         }
 
         .logo-header h1 {
             margin: 5px 0 0 0;
-            font-size: 22px;
+            font-size: 24px;
             color: #0f172a;
             font-weight: 600;
             letter-spacing: 0.5px;
         }
 
         .logo-header p {
-            margin: 5px 0 0 0;
-            font-size: 13px;
+            margin: 6px 0 0 0;
+            font-size: 14px;
             color: #64748b;
         }
 
-        input, button, select { 
-            padding: 12px 15px; 
-            margin: 8px 0; 
-            width: 100%; 
-            box-sizing: border-box; 
-            border: 1px solid #cbd5e1; 
-            border-radius: 8px; 
-            font-family: 'Prompt', sans-serif;
-            font-size: 14px;
-            transition: all 0.2s;
+        /* ป้ายกำกับฟอร์ม (Label) ให้กรอกง่ายไม่สับสน */
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
         }
 
-        input:focus {
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        input, button, select { 
+            padding: 12px 16px; 
+            margin: 0 0 10px 0; 
+            width: 100%; 
+            box-sizing: border-box; 
+            border: 1px solid var(--border-color); 
+            border-radius: 10px; 
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
         }
 
         button { 
             color: white; 
             border: none; 
             cursor: pointer; 
-            border-radius: 8px; 
+            border-radius: 10px; 
             font-weight: 600; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            transition: transform 0.1s, background-color 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.12);
         }
 
         button:active { transform: scale(0.98); }
-        
+
         .btn-add { background: var(--success); }
         .btn-add:hover { background: #059669; }
 
-        .btn-reduce { background: var(--danger); }
+        .btn-reduce { background: var(--danger); width: 100%; margin-top: 5px; padding: 14px; font-size: 15px; }
         .btn-reduce:hover { background: #dc2626; }
 
         .btn-member { background: var(--primary); }
@@ -123,41 +145,92 @@
 
         .btn-action { width: auto; padding: 6px 12px; font-size: 12px; margin: 2px; }
 
+        /* การ์ดเนื้อหา (Section Box) มีมิติและเงานุ่มขึ้น */
         .section-box { 
             background: #ffffff; 
-            border: 1px solid #e2e8f0; 
-            padding: 20px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            transition: transform 0.2s;
+            border: 1px solid var(--border-color); 
+            padding: 24px; 
+            border-radius: 16px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+            transition: all 0.25s ease;
         }
-        .section-box:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .section-box h3 { margin-top: 0; font-size: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; color: #334155; }
+        .section-box:hover { 
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05); 
+            border-color: #cbd5e1;
+        }
+        .section-box h3 { 
+            margin-top: 0; 
+            font-size: 17px; 
+            border-bottom: 2px solid #f1f5f9; 
+            padding-bottom: 10px; 
+            color: #334155; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        table { width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 14px; }
-        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; vertical-align: middle; }
+        .auth-box {
+            max-width: 450px; 
+            margin: auto;
+        }
+
+        .auth-title {
+            text-align: center; 
+            border: none !important; 
+            font-size: 18px;
+        }
+
+        /* ตารางโมเดิร์นพร้อม Hover แถว */
+        table { width: 100%; margin-top: 12px; border-collapse: separate; border-spacing: 0; font-size: 14px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
+        th, td { padding: 12px 14px; text-align: center; vertical-align: middle; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); }
+        th:last-child, td:last-child { border-right: none; }
         th { background: #f8fafc; color: #475569; font-weight: 600; }
-        tr:nth-child(even) { background-color: #fcfcfc; }
-        
-        .alert-box { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: none; font-weight: 600; text-align: center; border: 1px solid #fca5a5; }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) { background-color: #fafafa; }
+        tr:hover td { background-color: #f1f5f9; transition: background 0.15s; }
+
+        /* สถานะ Badges (ป้ายสถานะสต็อกแบบแคปซูล) */
+        .badge-stock {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .badge-normal { background-color: #d1fae5; color: #065f46; }
+        .badge-low { background-color: #fef3c7; color: #92400e; }
+        .badge-out { background-color: #fee2e2; color: #991b1b; }
+
+        .alert-box { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 10px; margin-bottom: 15px; display: none; font-weight: 600; text-align: center; border: 1px solid #fca5a5; }
         .hidden { display: none !important; }
-        .out-stock { background-color: #fee2e2 !important; color: #991b1b; font-weight: bold; }
-        
+
         .link-text { color: var(--primary); cursor: pointer; text-align: center; margin-top: 12px; font-size: 14px; font-weight: 500; }
         .link-text:hover { text-decoration: underline; color: var(--primary-dark); }
-        
-        .tab-btn { background: #e2e8f0; color: #475569; display: inline-block; width: auto; padding: 8px 16px; margin-right: 5px; border-radius: 6px; box-shadow: none; }
-        .tab-btn.active { background: #0f172a; color: white; }
 
+        .tab-btn { background: #e2e8f0; color: #475569; display: inline-block; width: auto; padding: 8px 18px; margin-right: 6px; border-radius: 8px; box-shadow: none; font-weight: 500; }
+        .tab-btn.active { background: #0f172a; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        /* แผงควบคุมผู้ใช้งาน จัดสมดุลซ้าย-ขวาใหม่ */
         .user-panel {
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 20px; 
-            background: #f1f5f9; 
-            padding: 12px 18px; 
-            border-radius: 10px;
+            margin-bottom: 24px; 
+            background: #f8fafc; 
+            padding: 14px 20px; 
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-info {
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
         }
     </style>
 </head>
@@ -175,27 +248,39 @@
 
     <!-- หน้า Login & Register -->
     <div id="authContainer">
-        <div id="loginSection" class="section-box" style="max-width: 450px; margin: auto;">
-            <h3 style="text-align: center; border: none; font-size: 18px;">🔒 เข้าสู่ระบบใช้งาน</h3>
-            <label>รหัสผู้ใช้ / รหัสสมาชิก:</label>
-            <input type="text" id="username" placeholder="Username หรือรหัสสมาชิก">
-            <label>รหัสผ่าน:</label>
-            <input type="password" id="password" placeholder="Password">
-            <button class="btn-add" onclick="handleLogin()" style="margin-top: 15px;">เข้าสู่ระบบ</button>
+        <div id="loginSection" class="section-box auth-box">
+            <h3 class="auth-title">🔒 เข้าสู่ระบบใช้งาน</h3>
+            <div class="input-group">
+                <label>รหัสผู้ใช้ / รหัสสมาชิก:</label>
+                <input type="text" id="username" placeholder="Username หรือรหัสสมาชิก">
+            </div>
+            <div class="input-group">
+                <label>รหัสผ่าน:</label>
+                <input type="password" id="password" placeholder="Password">
+            </div>
+            <button class="btn-add" onclick="handleLogin()" style="margin-top: 5px;">เข้าสู่ระบบ</button>
             <div class="link-text" onclick="toggleAuth('register')">ยังไม่มีบัญชี? สมัครสมาชิกใหม่</div>
         </div>
 
-        <div id="registerSection" class="section-box hidden" style="max-width: 450px; margin: auto;">
-            <h3 style="text-align: center; border: none; font-size: 18px;">👤 สมัครสมาชิกใหม่</h3>
-            <label>รหัสสมาชิก (Username):</label>
-            <input type="text" id="newMemberId" placeholder="เช่น M001">
-            <label>ชื่อ-นามสกุล:</label>
-            <input type="text" id="newMemberName" placeholder="กรอกชื่อ-นามสกุล">
-            <label>รหัสผ่าน:</label>
-            <input type="password" id="newMemberPass" placeholder="ตั้งรหัสผ่าน">
-            <label>เบอร์โทรศัพท์:</label>
-            <input type="text" id="newMemberPhone" placeholder="กรอกเบอร์โทร">
-            <button class="btn-member" onclick="registerMember()" style="margin-top: 15px;">ส่งคำขอสมัครสมาชิก</button>
+        <div id="registerSection" class="section-box auth-box hidden">
+            <h3 class="auth-title">👤 สมัครสมาชิกใหม่</h3>
+            <div class="input-group">
+                <label>รหัสสมาชิก (Username):</label>
+                <input type="text" id="newMemberId" placeholder="เช่น M001">
+            </div>
+            <div class="input-group">
+                <label>ชื่อ-นามสกุล:</label>
+                <input type="text" id="newMemberName" placeholder="กรอกชื่อ-นามสกุล">
+            </div>
+            <div class="input-group">
+                <label>รหัสผ่าน:</label>
+                <input type="password" id="newMemberPass" placeholder="ตั้งรหัสผ่าน">
+            </div>
+            <div class="input-group">
+                <label>เบอร์โทรศัพท์:</label>
+                <input type="text" id="newMemberPhone" placeholder="กรอกเบอร์โทร">
+            </div>
+            <button class="btn-member" onclick="registerMember()" style="margin-top: 5px;">ส่งคำขอสมัครสมาชิก</button>
             <div class="link-text" onclick="toggleAuth('login')">มีบัญชีแล้ว? กลับไปหน้าเข้าสู่ระบบ</div>
         </div>
     </div>
@@ -203,57 +288,57 @@
     <!-- หน้า Dashboard หลัก -->
     <div id="appSection" class="hidden">
         <div class="user-panel">
-            <div>
-                <h3 style="margin: 0; font-size: 16px; color: #0f172a;">📊 แผงควบคุมระบบสต็อก</h3>
+            <div class="user-info">
+                <h3 style="margin: 0; font-size: 16px; color: #0f172a; border: none; padding: 0;">📊 แผงควบคุมระบบสต็อก</h3>
                 <small id="userWelcome" style="color: #64748b; font-weight: 500;"></small>
             </div>
-            <div>
-                <button onclick="openPasswordModal()" style="width: auto; padding: 6px 12px; background: var(--warning); margin-right: 5px;">🔑 เปลี่ยนรหัสผ่าน</button>
-                <button onclick="handleLogout()" style="width: auto; padding: 6px 12px; background: #64748b;">ออกจากระบบ</button>
+            <div class="user-actions">
+                <button onclick="openPasswordModal()" style="width: auto; padding: 8px 14px; background: var(--warning); font-size: 13px;">🔑 เปลี่ยนรหัสผ่าน</button>
+                <button onclick="handleLogout()" style="width: auto; padding: 8px 14px; background: #64748b; font-size: 13px;">ออกจากระบบ</button>
             </div>
         </div>
 
         <div id="passwordSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
             <h3 style="color: #d97706;">🔑 เปลี่ยนรหัสผ่านส่วนตัว</h3>
-            <label>รหัสผ่านเดิม:</label><input type="password" id="oldPass" placeholder="กรอกรหัสผ่านเดิม">
-            <label>รหัสผ่านใหม่:</label><input type="password" id="newPass" placeholder="กรอกรหัสผ่านใหม่">
+            <div class="input-group"><label>รหัสผ่านเดิม:</label><input type="password" id="oldPass" placeholder="กรอกรหัสผ่านเดิม"></div>
+            <div class="input-group"><label>รหัสผ่านใหม่:</label><input type="password" id="newPass" placeholder="กรอกรหัสผ่านใหม่"></div>
             <div style="display: flex; gap: 8px; margin-top: 10px;">
-                <button style="background:var(--warning); flex:1;" onclick="changePassword()">ยืนยันเปลี่ยนรหัสผ่าน</button>
-                <button style="background:#94a3b8; width: auto; padding: 10px 15px;" onclick="cancelPasswordChange()">ยกเลิก</button>
+                <button style="background:var(--warning); flex:1; margin:0;" onclick="changePassword()">ยืนยันเปลี่ยนรหัสผ่าน</button>
+                <button style="background:#94a3b8; width: auto; padding: 10px 15px; margin:0;" onclick="cancelPasswordChange()">ยกเลิก</button>
             </div>
         </div>
 
         <div id="outOfStockAlert" class="alert-box">⚠️ แจ้งเตือน: มีอุปกรณ์สายอากาศในสต็อกหมด!</div>
 
-        <!-- เพิ่มสินค้าใหม่ (เฉพาะแอดมิน) - เอาช่องรูปออกแล้ว -->
+        <!-- เพิ่มสินค้าใหม่ (เฉพาะแอดมิน) -->
         <div id="adminProductSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
             <h3 style="color: #d97706;">✨ เพิ่มอุปกรณ์สายอากาศใหม่เข้าสู่ระบบ</h3>
-            <label>รหัสอุปกรณ์ (เช่น ANT-01):</label><input type="text" id="newProdId" placeholder="เช่น ANT-01">
-            <label>ชื่ออุปกรณ์:</label><input type="text" id="newProdName" placeholder="ชื่ออุปกรณ์สายอากาศ / สายสัญญาณ">
-            <label>จำนวนเริ่มต้น:</label><input type="number" id="newProdStock" value="0" min="0">
-            <button style="background:var(--warning); margin-top: 10px;" onclick="addNewProduct()">บันทึกอุปกรณ์ใหม่</button>
+            <div class="input-group"><label>รหัสอุปกรณ์ (เช่น ANT-01):</label><input type="text" id="newProdId" placeholder="เช่น ANT-01"></div>
+            <div class="input-group"><label>ชื่ออุปกรณ์:</label><input type="text" id="newProdName" placeholder="ชื่ออุปกรณ์สายอากาศ / สายสัญญาณ"></div>
+            <div class="input-group"><label>จำนวนเริ่มต้น:</label><input type="number" id="newProdStock" value="0" min="0"></div>
+            <button style="background:var(--warning); margin-top: 5px;" onclick="addNewProduct()">บันทึกอุปกรณ์ใหม่</button>
         </div>
 
         <!-- เพิ่ม/เบิกสต็อก -->
         <div style="display: flex; gap: 15px; flex-wrap: wrap;">
             <div id="addStockBox" class="section-box hidden" style="flex:1; min-width: 280px; border-left: 5px solid var(--success);">
                 <h3 style="color: #059669;">➕ เพิ่มสต็อกอุปกรณ์ (Admin)</h3>
-                <input type="text" id="addId" placeholder="รหัสอุปกรณ์">
-                <input type="number" id="addQty" value="1" min="1">
-                <button class="btn-add" style="margin-top: 10px;" onclick="updateStock('add')">ยืนยันเพิ่มสต็อก</button>
+                <div class="input-group"><label>รหัสอุปกรณ์:</label><input type="text" id="addId" placeholder="รหัสอุปกรณ์"></div>
+                <div class="input-group"><label>จำนวนที่ต้องการเพิ่ม:</label><input type="number" id="addQty" value="1" min="1"></div>
+                <button class="btn-add" style="margin-top: 5px;" onclick="updateStock('add')">ยืนยันเพิ่มสต็อก</button>
             </div>
             <div class="section-box" style="flex:1; min-width: 280px; border-left: 5px solid var(--danger);">
                 <h3 style="color: #dc2626;">➖ เบิกใช้อุปกรณ์</h3>
-                <input type="text" id="reduceId" placeholder="รหัสอุปกรณ์">
-                <input type="number" id="reduceQty" value="1" min="1">
-                <button class="btn-reduce" style="margin-top: 10px;" onclick="updateStock('reduce')">ยืนยันเบิกใช้งาน</button>
+                <div class="input-group"><label>รหัสอุปกรณ์:</label><input type="text" id="reduceId" placeholder="รหัสอุปกรณ์"></div>
+                <div class="input-group"><label>จำนวนที่ต้องการเบิก:</label><input type="number" id="reduceQty" value="1" min="1"></div>
+                <button class="btn-reduce" onclick="updateStock('reduce')">ยืนยันเบิกใช้งาน</button>
             </div>
         </div>
 
         <!-- ค้นหาสินค้า -->
         <div class="section-box">
             <h3 style="margin-top: 0;">📋 รายการอุปกรณ์สายอากาศในระบบ</h3>
-            <input type="text" id="searchBox" placeholder="🔍 ค้นหาด้วยรหัสหรือชื่ออุปกรณ์..." onkeyup="filterStock()">
+            <input type="text" id="searchBox" placeholder="🔍 ค้นหาด้วยรหัสหรือชื่ออุปกรณ์..." onkeyup="filterStock()" style="margin-bottom: 12px;">
             
             <table>
                 <thead>
@@ -273,10 +358,10 @@
                     <button class="tab-btn active" onclick="switchTab('add')" id="btnTabAdd">ประวัติการเพิ่ม</button>
                     <button class="tab-btn" onclick="switchTab('reduce')" id="btnTabReduce">ประวัติการเบิก</button>
                 </div>
-                <button onclick="exportCSV()" style="width: auto; background: #475569; padding: 8px 14px; font-size: 13px;">📥 ดาวน์โหลด CSV</button>
+                <button onclick="exportCSV()" style="width: auto; background: #475569; padding: 8px 14px; font-size: 13px; margin:0;">📥 ดาวน์โหลด CSV</button>
             </div>
 
-            <input type="text" id="historySearchBox" placeholder="🔍 กรองประวัติ (ค้นหาด้วยรหัส, ชื่ออุปกรณ์ หรือผู้ทำรายการ)..." onkeyup="renderHistories()" style="margin-top: 12px; margin-bottom: 10px;">
+            <input type="text" id="historySearchBox" placeholder="🔍 กรองประวัติ (ค้นหาด้วยรหัส, ชื่ออุปกรณ์ หรือผู้ทำรายการ)..." onkeyup="renderHistories()" style="margin-top: 15px; margin-bottom: 10px;">
 
             <div id="historyAddContainer">
                 <table>
@@ -431,14 +516,24 @@
         if (stocks.length > 0) {
             stocks.forEach(item => {
                 let stockNum = parseInt(item.stock) || 0;
-                let rowClass = stockNum <= 0 ? "out-stock" : "";
-                if (stockNum <= 0) hasOutOfStock = true;
+                
+                // ใช้ Badge แสดงสถานะสต็อกแทนการเปลี่ยนสีทั้งแถว
+                let badgeClass = "badge-normal";
+                let badgeText = stockNum;
+                if (stockNum <= 0) {
+                    badgeClass = "badge-out";
+                    badgeText = "หมด (0)";
+                    hasOutOfStock = true;
+                } else if (stockNum <= 5) {
+                    badgeClass = "badge-low";
+                    badgeText = `${stockNum} (ใกล้หมด)`;
+                }
 
-                stockHtml += `<tr class="${rowClass}">
+                stockHtml += `<tr>
                     <td><b>${item.id}</b></td>
                     <td>${item.name}</td>
-                    <td><b>${stockNum}</b> ${stockNum <= 0 ? '(หมด!)' : ''}</td>
-                    ${currentUserRole === 'admin' ? `<td><button class="btn-action btn-reduce" onclick="deleteProduct('${item.id}')">ลบ</button></td>` : ''}
+                    <td><span class="badge-stock ${badgeClass}">${badgeText}</span></td>
+                    ${currentUserRole === 'admin' ? `<td><button class="btn-action btn-reduce" onclick="deleteProduct('${item.id}')" style="margin:0; padding:6px 12px; width:auto;">ลบ</button></td>` : ''}
                 </tr>`;
             });
         } else {
