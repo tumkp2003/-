@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>JKP Engineering</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- รวมสไตล์ CSS ทั้งหมดไว้ในไฟล์เดียวเพื่อให้จัดการง่าย -->
     <style>
         :root {
             --primary: #0284c7;
@@ -28,7 +27,7 @@
         }
 
         .container { 
-            max-width: 900px; 
+            max-width: 950px; 
             background: var(--card-bg); 
             padding: 35px; 
             border-radius: 20px; 
@@ -39,53 +38,96 @@
 
         .logo-header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 25px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
             border-bottom: 2px dashed var(--border-color);
         }
 
-        /* โลโก้จานดาวเทียมและเอฟเฟกต์เรืองแสง */
         .antenna-logo {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 75px;
-            height: 75px;
+            width: 70px;
+            height: 70px;
             background: linear-gradient(135deg, #0ea5e9, #0369a1);
             border-radius: 50%;
-            box-shadow: 0 0 25px rgba(14, 165, 233, 0.4);
-            margin: 0 auto 12px auto;
-            position: relative;
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+            margin: 0 auto 10px auto;
             animation: pulse-glow 3s infinite;
         }
 
         @keyframes pulse-glow {
             0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.5); }
-            70% { box-shadow: 0 0 0 18px rgba(14, 165, 233, 0); }
+            70% { box-shadow: 0 0 0 15px rgba(14, 165, 233, 0); }
             100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
         }
 
-        .antenna-icon {
-            font-size: 34px;
-            color: white;
-            position: relative;
-        }
+        .antenna-icon { font-size: 30px; color: white; }
 
         .logo-header h1 {
             margin: 5px 0 0 0;
-            font-size: 24px;
+            font-size: 22px;
             color: #0f172a;
             font-weight: 600;
-            letter-spacing: 0.5px;
         }
 
         .logo-header p {
-            margin: 6px 0 0 0;
-            font-size: 14px;
+            margin: 4px 0 0 0;
+            font-size: 13px;
             color: #64748b;
         }
 
-        /* ป้ายกำกับฟอร์ม (Label) ให้กรอกง่ายไม่สับสน */
+        /* 📊 Dashboard Analytics Summary Cards */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 18px;
+            border-radius: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-info h4 { margin: 0; font-size: 12px; color: #64748b; font-weight: 500; }
+        .stat-info p { margin: 4px 0 0 0; font-size: 20px; font-weight: 600; color: #0f172a; }
+
+        .user-panel {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 24px; 
+            background: #f8fafc; 
+            padding: 14px 20px; 
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
         .input-group {
             margin-bottom: 15px;
             text-align: left;
@@ -125,113 +167,56 @@
             border-radius: 10px; 
             font-weight: 600; 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
-            transition: transform 0.1s, background-color 0.2s, box-shadow 0.2s;
-        }
-
-        button:hover {
-            box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.12);
+            transition: transform 0.1s, background-color 0.2s;
         }
 
         button:active { transform: scale(0.98); }
 
         .btn-add { background: var(--success); }
         .btn-add:hover { background: #059669; }
-
-        .btn-reduce { background: var(--danger); width: 100%; margin-top: 5px; padding: 14px; font-size: 15px; }
+        .btn-reduce { background: var(--danger); width: 100%; margin-top: 5px; padding: 14px; }
         .btn-reduce:hover { background: #dc2626; }
-
         .btn-member { background: var(--primary); }
-        .btn-member:hover { background: var(--primary-dark); }
 
-        .btn-action { width: auto; padding: 6px 12px; font-size: 12px; margin: 2px; }
-
-        /* การ์ดเนื้อหา (Section Box) มีมิติและเงานุ่มขึ้น */
         .section-box { 
             background: #ffffff; 
             border: 1px solid var(--border-color); 
             padding: 24px; 
             border-radius: 16px; 
             margin-bottom: 24px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
-            transition: all 0.25s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         }
-        .section-box:hover { 
-            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05); 
-            border-color: #cbd5e1;
-        }
+
         .section-box h3 { 
             margin-top: 0; 
             font-size: 17px; 
             border-bottom: 2px solid #f1f5f9; 
             padding-bottom: 10px; 
             color: #334155; 
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .auth-box {
-            max-width: 450px; 
-            margin: auto;
-        }
+        .auth-box { max-width: 450px; margin: auto; }
+        .auth-title { text-align: center; border: none !important; font-size: 18px; }
 
-        .auth-title {
-            text-align: center; 
-            border: none !important; 
-            font-size: 18px;
-        }
-
-        /* ตารางโมเดิร์นพร้อม Hover แถว */
         table { width: 100%; margin-top: 12px; border-collapse: separate; border-spacing: 0; font-size: 14px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
         th, td { padding: 12px 14px; text-align: center; vertical-align: middle; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); }
         th:last-child, td:last-child { border-right: none; }
         th { background: #f8fafc; color: #475569; font-weight: 600; }
-        tr:last-child td { border-bottom: none; }
         tr:nth-child(even) { background-color: #fafafa; }
-        tr:hover td { background-color: #f1f5f9; transition: background 0.15s; }
+        tr:hover td { background-color: #f1f5f9; }
 
-        /* สถานะ Badges (ป้ายสถานะสต็อกแบบแคปซูล) */
-        .badge-stock {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 12px;
-        }
+        .badge-stock { padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 12px; display: inline-block;}
         .badge-normal { background-color: #d1fae5; color: #065f46; }
         .badge-low { background-color: #fef3c7; color: #92400e; }
         .badge-out { background-color: #fee2e2; color: #991b1b; }
 
         .alert-box { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 10px; margin-bottom: 15px; display: none; font-weight: 600; text-align: center; border: 1px solid #fca5a5; }
         .hidden { display: none !important; }
-
         .link-text { color: var(--primary); cursor: pointer; text-align: center; margin-top: 12px; font-size: 14px; font-weight: 500; }
-        .link-text:hover { text-decoration: underline; color: var(--primary-dark); }
+        .link-text:hover { text-decoration: underline; }
 
         .tab-btn { background: #e2e8f0; color: #475569; display: inline-block; width: auto; padding: 8px 18px; margin-right: 6px; border-radius: 8px; box-shadow: none; font-weight: 500; }
-        .tab-btn.active { background: #0f172a; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-
-        /* แผงควบคุมผู้ใช้งาน จัดสมดุลซ้าย-ขวาใหม่ */
-        .user-panel {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 24px; 
-            background: #f8fafc; 
-            padding: 14px 20px; 
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .user-info {
-            font-weight: 500;
-            color: #334155;
-        }
-
-        .user-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .tab-btn.active { background: #0f172a; color: white; }
     </style>
 </head>
 <body>
@@ -239,47 +224,27 @@
 <div class="container">
     
     <div class="logo-header">
-        <div class="antenna-logo">
-            <span class="antenna-icon">📡</span>
-        </div>
+        <div class="antenna-logo"><span class="antenna-icon">📡</span></div>
         <h1>JKP Engineering</h1>
         <p>ระบบจัดการคลังอุปกรณ์สายอากาศและระบบสื่อสารโทรคมนาคม</p>
     </div>
 
-    <!-- หน้า Login & Register -->
+    <!-- ส่วน Login & Register -->
     <div id="authContainer">
         <div id="loginSection" class="section-box auth-box">
             <h3 class="auth-title">🔒 เข้าสู่ระบบใช้งาน</h3>
-            <div class="input-group">
-                <label>รหัสผู้ใช้ / รหัสสมาชิก:</label>
-                <input type="text" id="username" placeholder="Username หรือรหัสสมาชิก">
-            </div>
-            <div class="input-group">
-                <label>รหัสผ่าน:</label>
-                <input type="password" id="password" placeholder="Password">
-            </div>
+            <div class="input-group"><label>รหัสผู้ใช้ / รหัสสมาชิก:</label><input type="text" id="username" placeholder="Username"></div>
+            <div class="input-group"><label>รหัสผ่าน:</label><input type="password" id="password" placeholder="Password"></div>
             <button class="btn-add" onclick="handleLogin()" style="margin-top: 5px;">เข้าสู่ระบบ</button>
             <div class="link-text" onclick="toggleAuth('register')">ยังไม่มีบัญชี? สมัครสมาชิกใหม่</div>
         </div>
 
         <div id="registerSection" class="section-box auth-box hidden">
             <h3 class="auth-title">👤 สมัครสมาชิกใหม่</h3>
-            <div class="input-group">
-                <label>รหัสสมาชิก (Username):</label>
-                <input type="text" id="newMemberId" placeholder="เช่น M001">
-            </div>
-            <div class="input-group">
-                <label>ชื่อ-นามสกุล:</label>
-                <input type="text" id="newMemberName" placeholder="กรอกชื่อ-นามสกุล">
-            </div>
-            <div class="input-group">
-                <label>รหัสผ่าน:</label>
-                <input type="password" id="newMemberPass" placeholder="ตั้งรหัสผ่าน">
-            </div>
-            <div class="input-group">
-                <label>เบอร์โทรศัพท์:</label>
-                <input type="text" id="newMemberPhone" placeholder="กรอกเบอร์โทร">
-            </div>
+            <div class="input-group"><label>รหัสสมาชิก (Username):</label><input type="text" id="newMemberId" placeholder="เช่น M001"></div>
+            <div class="input-group"><label>ชื่อ-นามสกุล:</label><input type="text" id="newMemberName" placeholder="กรอกชื่อ-นามสกุล"></div>
+            <div class="input-group"><label>รหัสผ่าน:</label><input type="password" id="newMemberPass" placeholder="ตั้งรหัสผ่าน"></div>
+            <div class="input-group"><label>เบอร์โทรศัพท์:</label><input type="text" id="newMemberPhone" placeholder="เบอร์โทร"></div>
             <button class="btn-member" onclick="registerMember()" style="margin-top: 5px;">ส่งคำขอสมัครสมาชิก</button>
             <div class="link-text" onclick="toggleAuth('login')">มีบัญชีแล้ว? กลับไปหน้าเข้าสู่ระบบ</div>
         </div>
@@ -287,17 +252,20 @@
 
     <!-- หน้า Dashboard หลัก -->
     <div id="appSection" class="hidden">
+        
+        <!-- แผงผู้ใช้งาน -->
         <div class="user-panel">
-            <div class="user-info">
-                <h3 style="margin: 0; font-size: 16px; color: #0f172a; border: none; padding: 0;">📊 แผงควบคุมระบบสต็อก</h3>
-                <small id="userWelcome" style="color: #64748b; font-weight: 500;"></small>
+            <div>
+                <h3 id="userWelcome" style="margin: 0; font-size: 16px; color: #0f172a; border: none; padding: 0;"></h3>
+                <small id="userRoleBadge" style="color: #64748b; font-weight: 500;"></small>
             </div>
-            <div class="user-actions">
-                <button onclick="openPasswordModal()" style="width: auto; padding: 8px 14px; background: var(--warning); font-size: 13px;">🔑 เปลี่ยนรหัสผ่าน</button>
+            <div>
+                <button onclick="openPasswordModal()" style="width: auto; padding: 8px 14px; background: var(--warning); font-size: 13px; margin-right: 6px;">🔑 เปลี่ยนรหัสผ่าน</button>
                 <button onclick="handleLogout()" style="width: auto; padding: 8px 14px; background: #64748b; font-size: 13px;">ออกจากระบบ</button>
             </div>
         </div>
 
+        <!-- ส่วนเปลี่ยนรหัสผ่าน -->
         <div id="passwordSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
             <h3 style="color: #d97706;">🔑 เปลี่ยนรหัสผ่านส่วนตัว</h3>
             <div class="input-group"><label>รหัสผ่านเดิม:</label><input type="password" id="oldPass" placeholder="กรอกรหัสผ่านเดิม"></div>
@@ -308,12 +276,42 @@
             </div>
         </div>
 
-        <div id="outOfStockAlert" class="alert-box">⚠️ แจ้งเตือน: มีอุปกรณ์สายอากาศในสต็อกหมด!</div>
+        <!-- 📊 Dashboard Analytics Summary Cards -->
+        <div class="analytics-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #e0f2fe; color: #0284c7;">📦</div>
+                <div class="stat-info">
+                    <h4>อุปกรณ์ทั้งหมดในระบบ</h4>
+                    <p id="statTotalItems">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fef3c7; color: #d97706;">⚠️</div>
+                <div class="stat-info">
+                    <h4>สินค้าใกล้หมด / หมด</h4>
+                    <p id="statLowStock">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #d1fae5; color: #059669;">📥</div>
+                <div class="stat-info">
+                    <h4>รายการเพิ่มสต็อกรวม</h4>
+                    <p id="statTotalAdd">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">📤</div>
+                <div class="stat-info">
+                    <h4>รายการเบิกออกรวม</h4>
+                    <p id="statTotalReduce">0</p>
+                </div>
+            </div>
+        </div>
 
         <!-- เพิ่มสินค้าใหม่ (เฉพาะแอดมิน) -->
         <div id="adminProductSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
             <h3 style="color: #d97706;">✨ เพิ่มอุปกรณ์สายอากาศใหม่เข้าสู่ระบบ</h3>
-            <div class="input-group"><label>รหัสอุปกรณ์ (เช่น ANT-01):</label><input type="text" id="newProdId" placeholder="เช่น ANT-01"></div>
+            <div class="input-group"><label>รหัสอุปกรณ์ (เช่น ANT-01):</label><input type="text" id="newProdId" placeholder="รหัสอุปกรณ์"></div>
             <div class="input-group"><label>ชื่ออุปกรณ์:</label><input type="text" id="newProdName" placeholder="ชื่ออุปกรณ์สายอากาศ / สายสัญญาณ"></div>
             <div class="input-group"><label>จำนวนเริ่มต้น:</label><input type="number" id="newProdStock" value="0" min="0"></div>
             <button style="background:var(--warning); margin-top: 5px;" onclick="addNewProduct()">บันทึกอุปกรณ์ใหม่</button>
@@ -335,18 +333,16 @@
             </div>
         </div>
 
-        <!-- ค้นหาสินค้า -->
+        <!-- ตารางค้นหาและรายการอุปกรณ์ -->
+        <div id="outOfStockAlert" class="alert-box">⚠️ แจ้งเตือน: มีอุปกรณ์สายอากาศในสต็อกหมด!</div>
         <div class="section-box">
             <h3 style="margin-top: 0;">📋 รายการอุปกรณ์สายอากาศในระบบ</h3>
             <input type="text" id="searchBox" placeholder="🔍 ค้นหาด้วยรหัสหรือชื่ออุปกรณ์..." onkeyup="filterStock()" style="margin-bottom: 12px;">
-            
             <table>
                 <thead>
                     <tr><th>รหัส</th><th>ชื่ออุปกรณ์</th><th>คงเหลือ</th><th class="admin-only hidden">จัดการ</th></tr>
                 </thead>
-                <tbody id="stockTable">
-                    <tr><td colspan="4">กำลังโหลดข้อมูล...</td></tr>
-                </tbody>
+                <tbody id="stockTable"><tr><td colspan="4">กำลังโหลดข้อมูล...</td></tr></tbody>
             </table>
         </div>
 
@@ -361,7 +357,7 @@
                 <button onclick="exportCSV()" style="width: auto; background: #475569; padding: 8px 14px; font-size: 13px; margin:0;">📥 ดาวน์โหลด CSV</button>
             </div>
 
-            <input type="text" id="historySearchBox" placeholder="🔍 กรองประวัติ (ค้นหาด้วยรหัส, ชื่ออุปกรณ์ หรือผู้ทำรายการ)..." onkeyup="renderHistories()" style="margin-top: 15px; margin-bottom: 10px;">
+            <input type="text" id="historySearchBox" placeholder="🔍 กรองประวัติ..." onkeyup="renderHistories()" style="margin-top: 15px; margin-bottom: 10px;">
 
             <div id="historyAddContainer">
                 <table>
@@ -435,7 +431,9 @@
                 currentUsernameId = user;
                 
                 let roleText = currentUserRole === 'admin' ? 'แอดมิน (Admin)' : 'สมาชิก (Member)';
-                document.getElementById("userWelcome").innerText = `ผู้ใช้งาน: ${result.name} (${roleText})`;
+                document.getElementById("userWelcome").innerText = `ผู้ใช้งาน: ${result.name}`;
+                document.getElementById("userRoleBadge").innerText = `สถานะ: ${roleText}`;
+                
                 document.getElementById("authContainer").classList.add("hidden");
                 document.getElementById("appSection").classList.remove("hidden");
 
@@ -457,9 +455,7 @@
     }
 
     function handleLogout() {
-        currentUserRole = "";
-        currentUserName = "";
-        currentUsernameId = "";
+        currentUserRole = ""; currentUserName = ""; currentUsernameId = "";
         document.getElementById("authContainer").classList.remove("hidden");
         document.getElementById("appSection").classList.add("hidden");
         document.getElementById("username").value = "";
@@ -469,8 +465,7 @@
     }
 
     function openPasswordModal() {
-        let pSec = document.getElementById("passwordSection");
-        pSec.classList.toggle("hidden");
+        document.getElementById("passwordSection").classList.toggle("hidden");
     }
 
     function cancelPasswordChange() {
@@ -491,9 +486,7 @@
         .then(res => res.json())
         .then(result => {
             alert(result.message);
-            if (result.status === "success") {
-                cancelPasswordChange();
-            }
+            if (result.status === "success") { cancelPasswordChange(); }
         });
     }
 
@@ -507,7 +500,24 @@
 
             renderStockTable(globalStockData);
             renderHistories();
+            updateAnalyticsDashboard();
         });
+    }
+
+    // 📊 คำนวณและอัปเดตตัวเลขการ์ด Dashboard
+    function updateAnalyticsDashboard() {
+        let totalItems = globalStockData.length;
+        let lowOrOutCount = 0;
+
+        globalStockData.forEach(item => {
+            let stockNum = parseInt(item.stock) || 0;
+            if (stockNum <= 5) lowOrOutCount++;
+        });
+
+        document.getElementById("statTotalItems").innerText = totalItems;
+        document.getElementById("statLowStock").innerText = lowOrOutCount;
+        document.getElementById("statTotalAdd").innerText = globalAddHistory.length;
+        document.getElementById("statTotalReduce").innerText = globalReduceHistory.length;
     }
 
     function renderStockTable(stocks) {
@@ -516,24 +526,19 @@
         if (stocks.length > 0) {
             stocks.forEach(item => {
                 let stockNum = parseInt(item.stock) || 0;
-                
-                // ใช้ Badge แสดงสถานะสต็อกแทนการเปลี่ยนสีทั้งแถว
                 let badgeClass = "badge-normal";
                 let badgeText = stockNum;
                 if (stockNum <= 0) {
-                    badgeClass = "badge-out";
-                    badgeText = "หมด (0)";
-                    hasOutOfStock = true;
+                    badgeClass = "badge-out"; badgeText = "หมด (0)"; hasOutOfStock = true;
                 } else if (stockNum <= 5) {
-                    badgeClass = "badge-low";
-                    badgeText = `${stockNum} (ใกล้หมด)`;
+                    badgeClass = "badge-low"; badgeText = `${stockNum} (ใกล้หมด)`;
                 }
 
                 stockHtml += `<tr>
                     <td><b>${item.id}</b></td>
                     <td>${item.name}</td>
                     <td><span class="badge-stock ${badgeClass}">${badgeText}</span></td>
-                    ${currentUserRole === 'admin' ? `<td><button class="btn-action btn-reduce" onclick="deleteProduct('${item.id}')" style="margin:0; padding:6px 12px; width:auto;">ลบ</button></td>` : ''}
+                    ${currentUserRole === 'admin' ? `<td><button class="btn-action" onclick="deleteProduct('${item.id}')" style="background:var(--danger); margin:0; padding:6px 12px; width:auto; font-size:12px;">ลบ</button></td>` : ''}
                 </tr>`;
             });
         } else {
@@ -555,24 +560,18 @@
         let keyword = document.getElementById("historySearchBox").value.toLowerCase();
 
         let filteredAdd = globalAddHistory.filter(h => 
-            h.id.toLowerCase().includes(keyword) || 
-            h.name.toLowerCase().includes(keyword) || 
-            h.user.toLowerCase().includes(keyword)
+            h.id.toLowerCase().includes(keyword) || h.name.toLowerCase().includes(keyword) || h.user.toLowerCase().includes(keyword)
         );
-        let addHtml = filteredAdd.length > 0 ? filteredAdd.map(h => 
+        document.getElementById("historyAddTable").innerHTML = filteredAdd.length > 0 ? filteredAdd.map(h => 
             `<tr><td>${new Date(h.time).toLocaleString()}</td><td>${h.user}</td><td>${h.id}</td><td>${h.name}</td><td style="color:var(--success);font-weight:bold;">+${h.qty}</td></tr>`
         ).join('') : `<tr><td colspan="5">ไม่พบประวัติที่ค้นหา</td></tr>`;
-        document.getElementById("historyAddTable").innerHTML = addHtml;
 
         let filteredReduce = globalReduceHistory.filter(h => 
-            h.id.toLowerCase().includes(keyword) || 
-            h.name.toLowerCase().includes(keyword) || 
-            h.user.toLowerCase().includes(keyword)
+            h.id.toLowerCase().includes(keyword) || h.name.toLowerCase().includes(keyword) || h.user.toLowerCase().includes(keyword)
         );
-        let reduceHtml = filteredReduce.length > 0 ? filteredReduce.map(h => 
+        document.getElementById("historyReduceTable").innerHTML = filteredReduce.length > 0 ? filteredReduce.map(h => 
             `<tr><td>${new Date(h.time).toLocaleString()}</td><td>${h.user}</td><td>${h.id}</td><td>${h.name}</td><td style="color:var(--danger);font-weight:bold;">-${h.qty}</td></tr>`
         ).join('') : `<tr><td colspan="5">ไม่พบประวัติที่ค้นหา</td></tr>`;
-        document.getElementById("historyReduceTable").innerHTML = reduceHtml;
     }
 
     function registerMember() {
@@ -643,20 +642,16 @@
     function exportCSV() {
         let dataToExport = activeTab === 'add' ? globalAddHistory : globalReduceHistory;
         if (dataToExport.length === 0) { alert("ไม่มีข้อมูลประวัติสำหรับดาวน์โหลด"); return; }
-
         let csvContent = "\uFEFF" + "DateTime,User,ProductID,ProductName,Quantity\r\n";
         dataToExport.forEach(row => {
             csvContent += `"${new Date(row.time).toLocaleString()}","${row.user}","${row.id}","${row.name}",${row.qty}\r\n`;
         });
-
         let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         let url = URL.createObjectURL(blob);
         let a = document.createElement('a');
         a.href = url;
         a.download = `${activeTab === 'add' ? 'History_Add' : 'History_Reduce'}_Report.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 </script>
 
