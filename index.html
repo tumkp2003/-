@@ -2,8 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Antenna & Stock Management System</title>
-    <!-- Google Fonts: Prompt สำหรับความทันสมัยสไตล์ Tech -->
+    <title>JKP Engineering</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -27,7 +26,7 @@
         }
 
         .container { 
-            max-width: 800px; 
+            max-width: 850px; 
             background: var(--card-bg); 
             padding: 30px; 
             border-radius: 16px; 
@@ -36,7 +35,6 @@
             transition: all 0.3s ease;
         }
 
-        /* 📡 ส่วนโลโก้เว็บสายอากาศ (Antenna Logo) */
         .logo-header {
             text-align: center;
             margin-bottom: 25px;
@@ -68,22 +66,6 @@
             font-size: 32px;
             color: white;
             position: relative;
-        }
-
-        /* คลื่นสัญญาณจำลองรอบโลโก้ */
-        .antenna-logo::before, .antenna-logo::after {
-            content: '';
-            position: absolute;
-            border: 2px solid rgba(14, 165, 233, 0.4);
-            border-radius: 50%;
-            animation: wave-expand 2s infinite linear;
-        }
-        .antenna-logo::before { width: 90px; height: 90px; }
-        .antenna-logo::after { width: 110px; height: 110px; animation-delay: 1s; }
-
-        @keyframes wave-expand {
-            0% { transform: scale(0.8); opacity: 1; }
-            100% { transform: scale(1.2); opacity: 0; }
         }
 
         .logo-header h1 {
@@ -154,7 +136,7 @@
         .section-box h3 { margin-top: 0; font-size: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; color: #334155; }
 
         table { width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 14px; }
-        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
+        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; vertical-align: middle; }
         th { background: #f8fafc; color: #475569; font-weight: 600; }
         tr:nth-child(even) { background-color: #fcfcfc; }
         
@@ -168,7 +150,6 @@
         .tab-btn { background: #e2e8f0; color: #475569; display: inline-block; width: auto; padding: 8px 16px; margin-right: 5px; border-radius: 6px; box-shadow: none; }
         .tab-btn.active { background: #0f172a; color: white; }
 
-        /* แผงควบคุมโปรไฟล์ผู้ใช้งานด้านบน */
         .user-panel {
             display: flex; 
             justify-content: space-between; 
@@ -184,12 +165,11 @@
 
 <div class="container">
     
-    <!-- โลโก้และหัวข้อเว็บเกี่ยวกับสายอากาศ -->
     <div class="logo-header">
         <div class="antenna-logo">
             <span class="antenna-icon">📡</span>
         </div>
-        <h1>ANTENNA & TELECOM STOCK</h1>
+        <h1>JKP Engineering</h1>
         <p>ระบบจัดการคลังอุปกรณ์สายอากาศและระบบสื่อสารโทรคมนาคม</p>
     </div>
 
@@ -233,7 +213,6 @@
             </div>
         </div>
 
-        <!-- กล่องเปลี่ยนรหัสผ่าน -->
         <div id="passwordSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
             <h3 style="color: #d97706;">🔑 เปลี่ยนรหัสผ่านส่วนตัว</h3>
             <label>รหัสผ่านเดิม:</label><input type="password" id="oldPass" placeholder="กรอกรหัสผ่านเดิม">
@@ -246,7 +225,7 @@
 
         <div id="outOfStockAlert" class="alert-box">⚠️ แจ้งเตือน: มีอุปกรณ์สายอากาศในสต็อกหมด!</div>
 
-        <!-- เพิ่มสินค้าใหม่ (เฉพาะแอดมิน) -->
+        <!-- เพิ่มสินค้าใหม่ (เฉพาะแอดมิน) - เอาช่องรูปออกแล้ว -->
         <div id="adminProductSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
             <h3 style="color: #d97706;">✨ เพิ่มอุปกรณ์สายอากาศใหม่เข้าสู่ระบบ</h3>
             <label>รหัสอุปกรณ์ (เช่น ANT-01):</label><input type="text" id="newProdId" placeholder="เช่น ANT-01">
@@ -297,7 +276,6 @@
                 <button onclick="exportCSV()" style="width: auto; background: #475569; padding: 8px 14px; font-size: 13px;">📥 ดาวน์โหลด CSV</button>
             </div>
 
-            <!-- ช่องกรองประวัติ -->
             <input type="text" id="historySearchBox" placeholder="🔍 กรองประวัติ (ค้นหาด้วยรหัส, ชื่ออุปกรณ์ หรือผู้ทำรายการ)..." onkeyup="renderHistories()" style="margin-top: 12px; margin-bottom: 10px;">
 
             <div id="historyAddContainer">
@@ -320,7 +298,7 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWFAJY02lfsTiZZ4MOxgxFbTf3Z17VDeQV0H916i49ZonD3LAoTFCNy6swqLLSWQxwFw/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby7XvjAMRxM6B63oJNEdN29SNqYqVvuGzdLpdJvzeWveX-j5bDghZgt1Q1pGAKtcfdBxg/exec";
     let currentUserRole = "";
     let currentUserName = "";
     let currentUsernameId = "";
@@ -455,8 +433,9 @@
                 let stockNum = parseInt(item.stock) || 0;
                 let rowClass = stockNum <= 0 ? "out-stock" : "";
                 if (stockNum <= 0) hasOutOfStock = true;
+
                 stockHtml += `<tr class="${rowClass}">
-                    <td>${item.id}</td>
+                    <td><b>${item.id}</b></td>
                     <td>${item.name}</td>
                     <td><b>${stockNum}</b> ${stockNum <= 0 ? '(หมด!)' : ''}</td>
                     ${currentUserRole === 'admin' ? `<td><button class="btn-action btn-reduce" onclick="deleteProduct('${item.id}')">ลบ</button></td>` : ''}
