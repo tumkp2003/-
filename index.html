@@ -28,7 +28,7 @@
         }
 
         .container { 
-            max-width: 950px; 
+            max-width: 1050px; 
             background: var(--card-bg); 
             padding: 35px; 
             border-radius: 20px; 
@@ -76,6 +76,38 @@
             margin: 4px 0 0 0;
             font-size: 13px;
             color: #64748b;
+        }
+
+        /* เมนูสลับหมวดหมู่หลัก (Tabs) */
+        .main-nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        .main-nav-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+            box-shadow: none;
+            transition: all 0.2s;
+        }
+
+        .main-nav-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         /* 📊 Dashboard Analytics Summary Cards */
@@ -227,7 +259,7 @@
     <div class="logo-header">
         <div class="antenna-logo"><span class="antenna-icon">📡</span></div>
         <h1>JKP Engineering</h1>
-        <p>ระบบจัดการคลังอุปกรณ์สายอากาศและระบบสื่อสารโทรคมนาคม</p>
+        <p>ระบบจัดการคลังอุปกรณ์สายอากาศและเครื่องมือช่าง</p>
     </div>
 
     <!-- ส่วน Login & Register -->
@@ -277,100 +309,201 @@
             </div>
         </div>
 
-        <!-- 📊 Dashboard Analytics Summary Cards -->
-        <div class="analytics-grid">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #e0f2fe; color: #0284c7;">📦</div>
-                <div class="stat-info">
-                    <h4>อุปกรณ์ทั้งหมดในระบบ</h4>
-                    <p id="statTotalItems">0</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #fef3c7; color: #d97706;">⚠️</div>
-                <div class="stat-info">
-                    <h4>สินค้าใกล้หมด / หมด</h4>
-                    <p id="statLowStock">0</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #d1fae5; color: #059669;">📥</div>
-                <div class="stat-info">
-                    <h4>รายการเพิ่มสต็อกรวม</h4>
-                    <p id="statTotalAdd">0</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">📤</div>
-                <div class="stat-info">
-                    <h4>รายการเบิกออกรวม</h4>
-                    <p id="statTotalReduce">0</p>
-                </div>
-            </div>
+        <!-- เมนูหลักสลับระหว่าง "เบิกอุปกรณ์" และ "เบิกเครื่องมือช่าง" -->
+        <div class="main-nav-tabs">
+            <button class="main-nav-btn active" id="navEquipTab" onclick="switchMainTab('equipment')">📦 ระบบเบิกอุปกรณ์สายอากาศ</button>
+            <button class="main-nav-btn" id="navToolTab" onclick="switchMainTab('tools')">🛠️ ระบบเบิก/ยืมเครื่องมือช่าง</button>
         </div>
 
-        <!-- เพิ่มสินค้าใหม่ (เฉพาะแอดมิน) -->
-        <div id="adminProductSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
-            <h3 style="color: #d97706;">✨ เพิ่มอุปกรณ์สายอากาศใหม่เข้าสู่ระบบ</h3>
-            <div class="input-group"><label>รหัสอุปกรณ์ (เช่น ANT-01):</label><input type="text" id="newProdId" placeholder="รหัสอุปกรณ์"></div>
-            <div class="input-group"><label>ชื่ออุปกรณ์:</label><input type="text" id="newProdName" placeholder="ชื่ออุปกรณ์สายอากาศ / สายสัญญาณ"></div>
-            <div class="input-group"><label>จำนวนเริ่มต้น:</label><input type="number" id="newProdStock" value="0" min="0"></div>
-            <button style="background:var(--warning); margin-top: 5px;" onclick="addNewProduct()">บันทึกอุปกรณ์ใหม่</button>
-        </div>
-
-        <!-- เพิ่ม/เบิกสต็อก -->
-        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-            <div id="addStockBox" class="section-box hidden" style="flex:1; min-width: 280px; border-left: 5px solid var(--success);">
-                <h3 style="color: #059669;">➕ เพิ่มสต็อกอุปกรณ์ (Admin)</h3>
-                <div class="input-group"><label>รหัสอุปกรณ์:</label><input type="text" id="addId" placeholder="รหัสอุปกรณ์"></div>
-                <div class="input-group"><label>จำนวนที่ต้องการเพิ่ม:</label><input type="number" id="addQty" value="1" min="1"></div>
-                <button class="btn-add" style="margin-top: 5px;" onclick="updateStock('add')">ยืนยันเพิ่มสต็อก</button>
-            </div>
-            <div class="section-box" style="flex:1; min-width: 280px; border-left: 5px solid var(--danger);">
-                <h3 style="color: #dc2626;">➖ เบิกใช้อุปกรณ์</h3>
-                <div class="input-group"><label>รหัสอุปกรณ์:</label><input type="text" id="reduceId" placeholder="รหัสอุปกรณ์"></div>
-                <div class="input-group"><label>จำนวนที่ต้องการเบิก:</label><input type="number" id="reduceQty" value="1" min="1"></div>
-                <button class="btn-reduce" onclick="updateStock('reduce')">ยืนยันเบิกใช้งาน</button>
-            </div>
-        </div>
-
-        <!-- ตารางค้นหาและรายการอุปกรณ์ -->
-        <div id="outOfStockAlert" class="alert-box">⚠️ แจ้งเตือน: มีอุปกรณ์สายอากาศในสต็อกหมด!</div>
-        <div class="section-box">
-            <h3 style="margin-top: 0;">📋 รายการอุปกรณ์สายอากาศในระบบ</h3>
-            <input type="text" id="searchBox" placeholder="🔍 ค้นหาด้วยรหัสหรือชื่ออุปกรณ์..." onkeyup="filterStock()" style="margin-bottom: 12px;">
-            <table>
-                <thead>
-                    <tr><th>รหัส</th><th>ชื่ออุปกรณ์</th><th>คงเหลือ</th><th class="admin-only hidden">จัดการ</th></tr>
-                </thead>
-                <tbody id="stockTable"><tr><td colspan="4">กำลังโหลดข้อมูล...</td></tr></tbody>
-            </table>
-        </div>
-
-        <!-- ประวัติและตัวกรองประวัติ -->
-        <div class="section-box">
-            <h3 style="margin-top: 0;">📜 ประวัติการทำรายการ</h3>
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <button class="tab-btn active" onclick="switchTab('add')" id="btnTabAdd">ประวัติการเพิ่ม</button>
-                    <button class="tab-btn" onclick="switchTab('reduce')" id="btnTabReduce">ประวัติการเบิก</button>
+        <!-- ================= หมวดที่ 1: เบิกอุปกรณ์ (Equipment Stock) ================= -->
+        <div id="equipmentSectionContent">
+            <!-- 📊 Dashboard การ์ดอุปกรณ์ -->
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e0f2fe; color: #0284c7;">📦</div>
+                    <div class="stat-info">
+                        <h4>อุปกรณ์ทั้งหมดในระบบ</h4>
+                        <p id="statTotalItems">0</p>
+                    </div>
                 </div>
-                <button onclick="exportCSV()" style="width: auto; background: #475569; padding: 8px 14px; font-size: 13px; margin:0;">📥 ดาวน์โหลด CSV</button>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fef3c7; color: #d97706;">⚠️</div>
+                    <div class="stat-info">
+                        <h4>สินค้าใกล้หมด / หมด</h4>
+                        <p id="statLowStock">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #d1fae5; color: #059669;">📥</div>
+                    <div class="stat-info">
+                        <h4>รายการเพิ่มสต็อกรวม</h4>
+                        <p id="statTotalAdd">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">📤</div>
+                    <div class="stat-info">
+                        <h4>รายการเบิกออกรวม</h4>
+                        <p id="statTotalReduce">0</p>
+                    </div>
+                </div>
             </div>
 
-            <input type="text" id="historySearchBox" placeholder="🔍 กรองประวัติ..." onkeyup="renderHistories()" style="margin-top: 15px; margin-bottom: 10px;">
+            <!-- เพิ่มสินค้าใหม่ (เฉพาะแอดมิน) -->
+            <div id="adminProductSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
+                <h3 style="color: #d97706;">✨ เพิ่มอุปกรณ์สายอากาศใหม่เข้าสู่ระบบ</h3>
+                <div class="input-group"><label>รหัสอุปกรณ์ (เช่น ANT-01):</label><input type="text" id="newProdId" placeholder="รหัสอุปกรณ์"></div>
+                <div class="input-group"><label>ชื่ออุปกรณ์:</label><input type="text" id="newProdName" placeholder="ชื่ออุปกรณ์สายอากาศ / สายสัญญาณ"></div>
+                <div class="input-group"><label>จำนวนเริ่มต้น:</label><input type="number" id="newProdStock" value="0" min="0"></div>
+                <button style="background:var(--warning); margin-top: 5px;" onclick="addNewProduct()">บันทึกอุปกรณ์ใหม่</button>
+            </div>
 
-            <div id="historyAddContainer">
+            <!-- เพิ่ม/เบิกสต็อก -->
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div id="addStockBox" class="section-box hidden" style="flex:1; min-width: 280px; border-left: 5px solid var(--success);">
+                    <h3 style="color: #059669;">➕ เพิ่มสต็อกอุปกรณ์ (Admin)</h3>
+                    <div class="input-group"><label>รหัสอุปกรณ์:</label><input type="text" id="addId" placeholder="รหัสอุปกรณ์"></div>
+                    <div class="input-group"><label>จำนวนที่ต้องการเพิ่ม:</label><input type="number" id="addQty" value="1" min="1"></div>
+                    <button class="btn-add" style="margin-top: 5px;" onclick="updateStock('add')">ยืนยันเพิ่มสต็อก</button>
+                </div>
+                <div class="section-box" style="flex:1; min-width: 280px; border-left: 5px solid var(--danger);">
+                    <h3 style="color: #dc2626;">➖ เบิกใช้อุปกรณ์</h3>
+                    <div class="input-group"><label>รหัสอุปกรณ์:</label><input type="text" id="reduceId" placeholder="รหัสอุปกรณ์"></div>
+                    <div class="input-group"><label>จำนวนที่ต้องการเบิก:</label><input type="number" id="reduceQty" value="1" min="1"></div>
+                    <button class="btn-reduce" onclick="updateStock('reduce')">ยืนยันเบิกใช้งาน</button>
+                </div>
+            </div>
+
+            <!-- ตารางค้นหาและรายการอุปกรณ์ -->
+            <div id="outOfStockAlert" class="alert-box">⚠️ แจ้งเตือน: มีอุปกรณ์สายอากาศในสต็อกหมด!</div>
+            <div class="section-box">
+                <h3 style="margin-top: 0;">📋 รายการอุปกรณ์สายอากาศในระบบ</h3>
+                <input type="text" id="searchBox" placeholder="🔍 ค้นหาด้วยรหัสหรือชื่ออุปกรณ์..." onkeyup="filterStock()" style="margin-bottom: 12px;">
                 <table>
-                    <thead><tr><th>วัน-เวลา</th><th>ผู้ทำ</th><th>รหัส</th><th>ชื่ออุปกรณ์</th><th>จำนวน</th></tr></thead>
-                    <tbody id="historyAddTable"><tr><td colspan="5">ไม่มีประวัติ</td></tr></tbody>
+                    <thead>
+                        <tr><th>รหัส</th><th>ชื่ออุปกรณ์</th><th>คงเหลือ</th><th class="admin-only hidden">จัดการ</th></tr>
+                    </thead>
+                    <tbody id="stockTable"><tr><td colspan="4">กำลังโหลดข้อมูล...</td></tr></tbody>
                 </table>
             </div>
 
-            <div id="historyReduceContainer" class="hidden">
+            <!-- ประวัติและตัวกรองประวัติ -->
+            <div class="section-box">
+                <h3 style="margin-top: 0;">📜 ประวัติการทำรายการ</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <button class="tab-btn active" onclick="switchHistTab('add')" id="btnTabAdd">ประวัติการเพิ่ม</button>
+                        <button class="tab-btn" onclick="switchHistTab('reduce')" id="btnTabReduce">ประวัติการเบิก</button>
+                    </div>
+                    <button onclick="exportCSV()" style="width: auto; background: #475569; padding: 8px 14px; font-size: 13px; margin:0;">📥 ดาวน์โหลด CSV</button>
+                </div>
+
+                <input type="text" id="historySearchBox" placeholder="🔍 กรองประวัติ..." onkeyup="renderHistories()" style="margin-top: 15px; margin-bottom: 10px;">
+
+                <div id="historyAddContainer">
+                    <table>
+                        <thead><tr><th>วัน-เวลา</th><th>ผู้ทำ</th><th>รหัส</th><th>ชื่ออุปกรณ์</th><th>จำนวน</th></tr></thead>
+                        <tbody id="historyAddTable"><tr><td colspan="5">ไม่มีประวัติ</td></tr></tbody>
+                    </table>
+                </div>
+
+                <div id="historyReduceContainer" class="hidden">
+                    <table>
+                        <thead><tr><th>วัน-เวลา</th><th>ผู้เบิก</th><th>รหัส</th><th>ชื่ออุปกรณ์</th><th>จำนวน</th></tr></thead>
+                        <tbody id="historyReduceTable"><tr><td colspan="5">ไม่มีประวัติ</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= หมวดที่ 2: เบิกเครื่องมือช่าง / ยืม-คืนเครื่องมือ (Tools & Equipment) ================= -->
+        <div id="toolsSectionContent" class="hidden">
+            <!-- 📊 Dashboard การ์ดเครื่องมือช่าง -->
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e0f2fe; color: #0284c7;">🛠️</div>
+                    <div class="stat-info">
+                        <h4>เครื่องมือทั้งหมด</h4>
+                        <p id="toolStatTotal">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #d1fae5; color: #059669;">✅</div>
+                    <div class="stat-info">
+                        <h4>พร้อมใช้งาน</h4>
+                        <p id="toolStatReady">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fef3c7; color: #d97706;">🔄</div>
+                    <div class="stat-info">
+                        <h4>กำลังใช้งาน / ยืม</h4>
+                        <p id="toolStatBorrow">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">⚠️</div>
+                    <div class="stat-info">
+                        <h4>ชำรุด / ส่งซ่อม</h4>
+                        <p id="toolStatBroken">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ฟอร์มยืม-คืน / แจ้งปัญหาเครื่องมือ -->
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div class="section-box" style="flex:1; min-width: 280px; border-left: 5px solid var(--primary);">
+                    <h3 style="color: var(--primary);">🔄 ยืม - คืน เครื่องมือช่าง</h3>
+                    <div class="input-group"><label>เลือกเครื่องมือ:</label>
+                        <select id="borrowToolSelect">
+                            <option value="">กำลังโหลดรายการเครื่องมือ...</option>
+                        </select>
+                    </div>
+                    <div class="input-group"><label>สถานะการทำรายการ:</label>
+                        <select id="borrowActionType">
+                            <option value="ยืมเครื่องมือ">ยืมเครื่องมือไปใช้งาน</option>
+                            <option value="คืนเครื่องมือ">คืนเครื่องมือเข้าคลัง</option>
+                        </select>
+                    </div>
+                    <div class="input-group"><label>หมายเหตุ / หน้างาน:</label><input type="text" id="borrowNote" placeholder="ระบุสถานที่ใช้งานหรือโครงการ"></div>
+                    <button class="btn-member" onclick="submitToolBorrow()" style="margin-top: 5px;">ยืนยันทำรายการยืม-คืน</button>
+                </div>
+
+                <div class="section-box" style="flex:1; min-width: 280px; border-left: 5px solid var(--danger);">
+                    <h3 style="color: #danger;">⚠️ แจ้งปัญหาเครื่องมือชำรุด</h3>
+                    <div class="input-group"><label>เลือกเครื่องมือที่มีปัญหา:</label>
+                        <select id="brokenToolSelect">
+                            <option value="">กำลังโหลดรายการเครื่องมือ...</option>
+                        </select>
+                    </div>
+                    <div class="input-group"><label>รายละเอียดอาการชำรุด:</label><input type="text" id="brokenDesc" placeholder="ระบุอาการเสีย / ความเสียหาย"></div>
+                    <button class="btn-reduce" onclick="submitToolBroken()" style="margin-top: 5px; background: var(--danger);">ส่งแจ้งซ่อม / ชำรุด</button>
+                </div>
+            </div>
+
+            <!-- ตารางรายการเครื่องมือช่างทั้งหมด -->
+            <div class="section-box">
+                <h3 style="margin-top: 0;">📋 รายการเครื่องมือช่างและสถานะปัจจุบัน</h3>
                 <table>
-                    <thead><tr><th>วัน-เวลา</th><th>ผู้เบิก</th><th>รหัส</th><th>ชื่ออุปกรณ์</th><th>จำนวน</th></tr></thead>
-                    <tbody id="historyReduceTable"><tr><td colspan="5">ไม่มีประวัติ</td></tr></tbody>
+                    <thead>
+                        <tr><th>รหัสเครื่องมือ</th><th>ชื่อเครื่องมือ</th><th>จำนวน</th><th>สถานะ</th></tr>
+                    </thead>
+                    <tbody id="toolStockTable">
+                        <tr><td colspan="4">กำลังโหลดข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ตารางประวัติเครื่องมือช่าง (ToolsHistory) -->
+            <div class="section-box">
+                <h3 style="margin-top: 0;">📜 ประวัติการยืม-คืน / แจ้งซ่อมเครื่องมือช่าง</h3>
+                <table>
+                    <thead>
+                        <tr><th>วัน-เวลา</th><th>ผู้ทำรายการ</th><th>รหัส</th><th>ชื่อเครื่องมือ</th><th>รายการ</th><th>หมายเหตุ</th></tr>
+                    </thead>
+                    <tbody id="toolsHistoryTable">
+                        <tr><td colspan="6">ไม่มีประวัติ</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -380,14 +513,17 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby7XvjAMRxM6B63oJNEdN29SNqYqVvuGzdLpdJvzeWveX-j5bDghZgt1Q1pGAKtcfdBxg/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyD4IM9a6kKxiOxSeE8pnIpxu_45g-y69n2FjFcwJ7j7QQPksEzQq6tj66BmClX67H81Q/exec";
     let currentUserRole = "";
     let currentUserName = "";
     let currentUsernameId = "";
     let globalStockData = [];
     let globalAddHistory = [];
     let globalReduceHistory = [];
+    let globalToolsData = [];
+    let globalToolsHistory = [];
     let activeTab = 'add';
+    let activeHistTab = 'add';
 
     function toggleAuth(mode) {
         if (mode === 'register') {
@@ -396,6 +532,20 @@
         } else {
             document.getElementById("registerSection").classList.add("hidden");
             document.getElementById("loginSection").classList.remove("hidden");
+        }
+    }
+
+    function switchMainTab(type) {
+        if (type === 'equipment') {
+            document.getElementById("equipmentSectionContent").classList.remove("hidden");
+            document.getElementById("toolsSectionContent").classList.add("hidden");
+            document.getElementById("navEquipTab").classList.add("active");
+            document.getElementById("navToolTab").classList.remove("active");
+        } else {
+            document.getElementById("equipmentSectionContent").classList.add("hidden");
+            document.getElementById("toolsSectionContent").classList.remove("hidden");
+            document.getElementById("navEquipTab").classList.remove("active");
+            document.getElementById("navToolTab").classList.add("active");
         }
     }
 
@@ -415,6 +565,11 @@
         renderHistories();
     }
 
+    function switchHistTab(type) {
+        activeHistTab = type;
+        switchTab(type);
+    }
+
     function handleLogin() {
         let user = document.getElementById("username").value.trim();
         let pass = document.getElementById("password").value.trim();
@@ -431,7 +586,7 @@
                 currentUserName = result.name;
                 currentUsernameId = user;
                 
-                let roleText = currentUserRole === 'admin' ? 'แอดมิน (Admin)' : 'สมาชิก (Member)';
+                let roleText = currentUserRole === 'admin' ? 'แอดมิน (Admin)' : 'ช่างติดตั้ง (Technician)';
                 document.getElementById("userWelcome").innerText = `ผู้ใช้งาน: ${result.name}`;
                 document.getElementById("userRoleBadge").innerText = `สถานะ: ${roleText}`;
                 
@@ -498,10 +653,13 @@
             globalStockData = data.stock || [];
             globalAddHistory = data.historyAdd || [];
             globalReduceHistory = data.historyReduce || [];
+            globalToolsData = data.tools || [];
+            globalToolsHistory = data.toolsHistory || [];
 
             renderStockTable(globalStockData);
             renderHistories();
             updateAnalyticsDashboard();
+            renderToolsData();
         });
     }
 
@@ -519,6 +677,58 @@
         document.getElementById("statLowStock").innerText = lowOrOutCount;
         document.getElementById("statTotalAdd").innerText = globalAddHistory.length;
         document.getElementById("statTotalReduce").innerText = globalReduceHistory.length;
+    }
+
+    function renderToolsData() {
+        let totalTools = globalToolsData.length;
+        let readyTools = 0;
+        let borrowTools = 0;
+        let brokenTools = 0;
+
+        let toolTableHtml = "";
+        let selectOptionsHtml = "";
+
+        globalToolsData.forEach(tool => {
+            if (tool.status === "พร้อมใช้งาน") readyTools++;
+            else if (tool.status === "กำลังยืม") borrowTools++;
+            else brokenTools++;
+
+            toolTableHtml += `<tr>
+                <td><b>${tool.id}</b></td>
+                <td>${tool.name}</td>
+                <td>${tool.stock}</td>
+                <td><span class="badge-stock ${tool.status === 'พร้อมใช้งาน' ? 'badge-normal' : 'badge-out'}">${tool.status}</span></td>
+            </tr>`;
+
+            selectOptionsHtml += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
+        });
+
+        document.getElementById("toolStatTotal").innerText = totalTools;
+        document.getElementById("toolStatReady").innerText = readyTools;
+        document.getElementById("toolStatBorrow").innerText = borrowTools;
+        document.getElementById("toolStatBroken").innerText = brokenTools;
+
+        document.getElementById("toolStockTable").innerHTML = toolTableHtml || `<tr><td colspan="4">ไม่พบข้อมูลเครื่องมือช่าง</td></tr>`;
+        document.getElementById("borrowToolSelect").innerHTML = selectOptionsHtml;
+        document.getElementById("brokenToolSelect").innerHTML = selectOptionsHtml;
+
+        // Render Tools History
+        let histHtml = "";
+        if (globalToolsHistory.length > 0) {
+            globalToolsHistory.slice().reverse().forEach(h => {
+                histHtml += `<tr>
+                    <td>${new Date(h.time).toLocaleString()}</td>
+                    <td>${h.user}</td>
+                    <td><b>${h.id}</b></td>
+                    <td>${h.name}</td>
+                    <td style="font-weight:bold; color:${h.action.includes('ยืม') ? 'var(--primary)' : (h.action.includes('แจ้งซ่อม') ? 'var(--danger)' : 'var(--success)')}">${h.action}</td>
+                    <td>${h.note || '-'}</td>
+                </tr>`;
+            });
+        } else {
+            histHtml = `<tr><td colspan="6">ไม่มีประวัติ</td></tr>`;
+        }
+        document.getElementById("toolsHistoryTable").innerHTML = histHtml;
     }
 
     function renderStockTable(stocks) {
@@ -637,6 +847,50 @@
                 alert("บันทึกสำเร็จ! คงเหลือ: " + result.newStock);
                 loadData();
             } else { alert("เกิดข้อผิดพลาด: " + result.message); }
+        });
+    }
+
+    function submitToolBorrow() {
+        let toolId = document.getElementById("borrowToolSelect").value;
+        let action = document.getElementById("borrowActionType").value;
+        let note = document.getElementById("borrowNote").value.trim();
+        
+        let selectedTool = globalToolsData.find(t => t.id === toolId);
+        let toolName = selectedTool ? selectedTool.name : toolId;
+
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "toolAction", userName: currentUserName, toolId: toolId, toolName: toolName, actionType: action, note: note })
+        })
+        .then(res => res.json())
+        .then(result => {
+            alert(`บันทึกข้อมูลสำเร็จ: ทำรายการ ${action} เรียบร้อยแล้ว`);
+            document.getElementById("borrowNote").value = "";
+            loadData();
+        }).catch(() => {
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+        });
+    }
+
+    function submitToolBroken() {
+        let toolId = document.getElementById("brokenToolSelect").value;
+        let desc = document.getElementById("brokenDesc").value.trim();
+        if (!desc) { alert("กรุณาระบุรายละเอียดอาการชำรุด"); return; }
+
+        let selectedTool = globalToolsData.find(t => t.id === toolId);
+        let toolName = selectedTool ? selectedTool.name : toolId;
+
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "toolAction", userName: currentUserName, toolId: toolId, toolName: toolName, actionType: "แจ้งซ่อม/ชำรุด", note: desc })
+        })
+        .then(res => res.json())
+        .then(result => {
+            alert(`ส่งแจ้งซ่อมสำเร็จ: อาการ ${desc}`);
+            document.getElementById("brokenDesc").value = "";
+            loadData();
+        }).catch(() => {
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
         });
     }
 
