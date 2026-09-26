@@ -448,6 +448,15 @@
                 </div>
             </div>
 
+            <!-- เพิ่มเครื่องมือใหม่ / เพิ่มจำนวนเครื่องมือ (เฉพาะแอดมิน) -->
+            <div id="adminToolSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
+                <h3 style="color: #d97706;">✨ เพิ่มเครื่องมือช่างใหม่ / เพิ่มจำนวนเครื่องเดิม (Admin)</h3>
+                <div class="input-group"><label>รหัสเครื่องมือ (เช่น T001):</label><input type="text" id="newToolId" placeholder="รหัสเครื่องมือ"></div>
+                <div class="input-group"><label>ชื่อเครื่องมือ:</label><input type="text" id="newToolName" placeholder="ชื่อเครื่องมือช่าง"></div>
+                <div class="input-group"><label>จำนวนที่ต้องการเพิ่ม:</label><input type="number" id="newToolStock" value="1" min="1"></div>
+                <button style="background:var(--warning); margin-top: 5px;" onclick="addNewTool()">บันทึก / เพิ่มจำนวนเครื่องมือ</button>
+            </div>
+
             <!-- ฟอร์มแยกช่อง "ยืมเครื่องมือ" และ "คืนเครื่องมือ" ออกจากกัน -->
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 <!-- ฟอร์มยืมเครื่องมือ -->
@@ -458,6 +467,7 @@
                             <option value="">กำลังโหลด...</option>
                         </select>
                     </div>
+                    <div class="input-group"><label>จำนวนที่ต้องการยืม:</label><input type="number" id="borrowQtyInput" value="1" min="1"></div>
                     <div class="input-group"><label>หมายเหตุ / หน้างาน:</label><input type="text" id="borrowNote" placeholder="ระบุสถานที่ใช้งานหรือโครงการ"></div>
                     <button class="btn-member" onclick="submitToolAction('ยืมเครื่องมือ')" style="margin-top: 5px;">ยืนยันการยืม</button>
                 </div>
@@ -470,6 +480,7 @@
                             <option value="">กำลังโหลด...</option>
                         </select>
                     </div>
+                    <div class="input-group"><label>จำนวนที่ต้องการคืน:</label><input type="number" id="returnQtyInput" value="1" min="1"></div>
                     <div class="input-group"><label>หมายเหตุ / สภาพเครื่องมือตอนคืน:</label><input type="text" id="returnNote" placeholder="ระบุสภาพเครื่องมือ"></div>
                     <button class="btn-add" onclick="submitToolAction('คืนเครื่องมือ')" style="margin-top: 5px;">ยืนยันการคืน</button>
                 </div>
@@ -494,10 +505,10 @@
                 <h3 style="margin-top: 0;">📋 รายการเครื่องมือช่างและสถานะปัจจุบัน</h3>
                 <table>
                     <thead>
-                        <tr><th>รหัสเครื่องมือ</th><th>ชื่อเครื่องมือ</th><th>จำนวน</th><th>สถานะ</th></tr>
+                        <tr><th>รหัสเครื่องมือ</th><th>ชื่อเครื่องมือ</th><th>ทั้งหมด</th><th>คงเหลือ</th><th>สถานะ</th></tr>
                     </thead>
                     <tbody id="toolStockTable">
-                        <tr><td colspan="4">กำลังโหลดข้อมูล...</td></tr>
+                        <tr><td colspan="5">กำลังโหลดข้อมูล...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -521,7 +532,7 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyYzF0PURAONYAt35MABU7AxTskfPqmMNkhf1C4riOZ3EPUVf2BaJz6bGDrIMbXgMvuOQ/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw805zzZpTrN0iW0uzaphJmrUJBFps7zqApwGIVbOtNciYxYPACIzaCKdJ_j3vtQMBjYA/exec";
     let currentUserRole = "";
     let currentUserName = "";
     let currentUsernameId = "";
@@ -605,10 +616,12 @@
                     document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
                     document.getElementById("adminProductSection").classList.remove("hidden");
                     document.getElementById("addStockBox").classList.remove("hidden");
+                    document.getElementById("adminToolSection").classList.remove("hidden");
                 } else {
                     document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
                     document.getElementById("adminProductSection").classList.add("hidden");
                     document.getElementById("addStockBox").classList.add("hidden");
+                    document.getElementById("adminToolSection").classList.add("hidden");
                 }
 
                 loadData();
@@ -698,24 +711,28 @@
         let brokenOpts = "";
 
         globalToolsData.forEach(tool => {
-            if (tool.status === "พร้อมใช้งาน") readyTools++;
-            else if (tool.status === "กำลังยืม") borrowTools++;
-            else brokenTools++;
+            let rem = (tool.remaining !== undefined) ? tool.remaining : tool.stock;
+            if (tool.status === "พร้อมใช้งาน" || rem > 0) readyTools++;
+            if (tool.borrowed > 0) borrowTools++;
 
-            let badgeClass = (tool.status === "พร้อมใช้งาน") ? "badge-normal" : "badge-out";
+            let badgeClass = (rem === 0) ? "badge-out" : (tool.borrowed > 0 ? "badge-low" : "badge-normal");
+            let badgeText = tool.status;
+
             toolTableHtml += `<tr>
                 <td><b>${tool.id}</b></td>
                 <td>${tool.name}</td>
                 <td>${tool.stock}</td>
-                <td><span class="badge-stock ${badgeClass}">${tool.status}</span></td>
+                <td><b>${rem}</b></td>
+                <td><span class="badge-stock ${badgeClass}">${badgeText}</span></td>
             </tr>`;
 
-            // แยกตัวเลือกใน Dropdown ตามสถานะของเครื่องมือ
-            if (tool.status === "พร้อมใช้งาน") {
-                borrowOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
+            // เงื่อนไขสำหรับ Dropdown ยืม (ถ้ายังมีเหลือ ให้เลือกยืมได้)
+            if (rem > 0) {
+                borrowOpts += `<option value="${tool.id}">${tool.id} - ${tool.name} (เหลือ ${rem} เครื่อง)</option>`;
             }
-            if (tool.status === "กำลังยืม") {
-                returnOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
+            // เงื่อนไขสำหรับ Dropdown คืน (ถ้ามีถูกยืมไป ให้เลือกคืนได้)
+            if (tool.borrowed > 0) {
+                returnOpts += `<option value="${tool.id}">${tool.id} - ${tool.name} (กำลังยืม ${tool.borrowed} เครื่อง)</option>`;
             }
             brokenOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
         });
@@ -725,9 +742,8 @@
         document.getElementById("toolStatBorrow").innerText = borrowTools;
         document.getElementById("toolStatBroken").innerText = brokenTools;
 
-        document.getElementById("toolStockTable").innerHTML = toolTableHtml || `<tr><td colspan="4">ไม่พบข้อมูลเครื่องมือช่าง</td></tr>`;
+        document.getElementById("toolStockTable").innerHTML = toolTableHtml || `<tr><td colspan="5">ไม่พบข้อมูลเครื่องมือช่าง</td></tr>`;
         
-        // กำหนดค่า Dropdown แยกฟอร์มอย่างชัดเจน
         document.getElementById("borrowToolSelect").innerHTML = borrowOpts || `<option value="">ไม่มีเครื่องมือที่พร้อมยืม</option>`;
         document.getElementById("returnToolSelect").innerHTML = returnOpts || `<option value="">ไม่มีเครื่องมือที่กำลังถูกยืม</option>`;
         document.getElementById("brokenToolSelect").innerHTML = brokenOpts || `<option value="">ไม่พบเครื่องมือ</option>`;
@@ -844,6 +860,28 @@
         });
     }
 
+    function addNewTool() {
+        let id = document.getElementById("newToolId").value.trim();
+        let name = document.getElementById("newToolName").value.trim();
+        let stock = document.getElementById("newToolStock").value;
+        if (!id || !name) { alert("กรุณากรอกรหัสและชื่อเครื่องมือ"); return; }
+
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "addTool", id: id, name: name, stock: stock })
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.status === "success") {
+                alert(result.message || "บันทึกเครื่องมือสำเร็จ!");
+                document.getElementById("newToolId").value = "";
+                document.getElementById("newToolName").value = "";
+                document.getElementById("newToolStock").value = "1";
+                loadData();
+            } else { alert(result.message); }
+        });
+    }
+
     function deleteProduct(id) {
         if(confirm("ต้องการลบอุปกรณ์นี้ออกจากระบบใช่หรือไม่?")) {
             fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "deleteProduct", id: id }) })
@@ -871,6 +909,7 @@
 
     function submitToolAction(actionType) {
         let toolId = document.getElementById(actionType === 'ยืมเครื่องมือ' ? "borrowToolSelect" : "returnToolSelect").value;
+        let qty = document.getElementById(actionType === 'ยืมเครื่องมือ' ? "borrowQtyInput" : "returnQtyInput").value;
         let note = document.getElementById(actionType === 'ยืมเครื่องมือ' ? "borrowNote" : "returnNote").value.trim();
         if (!toolId) { alert("กรุณาเลือกเครื่องมือ"); return; }
 
@@ -879,7 +918,7 @@
 
         fetch(WEB_APP_URL, {
             method: "POST",
-            body: JSON.stringify({ action: "toolAction", userName: currentUserName, toolId: toolId, toolName: toolName, actionType: actionType, note: note })
+            body: JSON.stringify({ action: "toolAction", userName: currentUserName, toolId: toolId, toolName: toolName, actionType: actionType, qty: qty, note: note })
         })
         .then(res => res.json())
         .then(result => {
@@ -888,7 +927,7 @@
                 document.getElementById("borrowNote").value = "";
                 document.getElementById("returnNote").value = "";
                 loadData();
-            } else { alert("เกิดข้อผิดพลาด"); }
+            } else { alert(result.message || "เกิดข้อผิดพลาด"); }
         }).catch(() => {
             alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
         });
@@ -904,7 +943,7 @@
 
         fetch(WEB_APP_URL, {
             method: "POST",
-            body: JSON.stringify({ action: "toolAction", userName: currentUserName, toolId: toolId, toolName: toolName, actionType: "แจ้งซ่อม/ชำรุด", note: desc })
+            body: JSON.stringify({ action: "toolAction", userName: currentUserName, toolId: toolId, toolName: toolName, actionType: "แจ้งซ่อม/ชำรุด", qty: 1, note: desc })
         })
         .then(res => res.json())
         .then(result => {
