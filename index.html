@@ -448,6 +448,15 @@
                 </div>
             </div>
 
+            <!-- เพิ่มเครื่องมือช่างใหม่ (เฉพาะแอดมินเท่านั้น) -->
+            <div id="adminToolSection" class="section-box hidden" style="border-left: 5px solid var(--warning);">
+                <h3 style="color: #d97706;">🛠️ เพิ่มเครื่องมือช่างใหม่เข้าสู่ระบบ (Admin)</h3>
+                <div class="input-group"><label>รหัสเครื่องมือ (เช่น TOOL-01):</label><input type="text" id="newToolId" placeholder="รหัสเครื่องมือ"></div>
+                <div class="input-group"><label>ชื่อเครื่องมือ:</label><input type="text" id="newToolName" placeholder="ชื่อเครื่องมือช่าง"></div>
+                <div class="input-group"><label>จำนวนเครื่องมือ (Stock):</label><input type="number" id="newToolStock" value="1" min="1"></div>
+                <button style="background:var(--warning); margin-top: 5px;" onclick="addNewTool()">บันทึกเครื่องมือใหม่</button>
+            </div>
+
             <!-- ฟอร์มแยกช่อง "ยืมเครื่องมือ" และ "คืนเครื่องมือ" ออกจากกัน -->
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 <!-- ฟอร์มยืมเครื่องมือ -->
@@ -494,7 +503,7 @@
                 <h3 style="margin-top: 0;">📋 รายการเครื่องมือช่างและสถานะปัจจุบัน</h3>
                 <table>
                     <thead>
-                        <tr><th>รหัสเครื่องมือ</th><th>ชื่อเครื่องมือ</th><th>จำนวน</th><th>สถานะ</th></tr>
+                        <tr><th>รหัสเครื่องมือ</th><th>ชื่อเครื่องมือ</th><th>จำนวน (Stock)</th><th>สถานะ</th></tr>
                     </thead>
                     <tbody id="toolStockTable">
                         <tr><td colspan="4">กำลังโหลดข้อมูล...</td></tr>
@@ -521,7 +530,7 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwAh-bpERCpREvJVQ0_RNGxFDyJXGa9RW1X7L30jzGAgFo0Zh35-ldJ8aH4tnIjkCgKSQ/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwxL0cl_V8Ne_HHSYpqu-cZSneUvkYM6Wkoe1eVtUT7aJ2O549aNRH7zRGFPhMfLXvG4A/exec";
     let currentUserRole = "";
     let currentUserName = "";
     let currentUsernameId = "";
@@ -604,10 +613,12 @@
                 if (currentUserRole === 'admin') {
                     document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
                     document.getElementById("adminProductSection").classList.remove("hidden");
+                    document.getElementById("adminToolSection").classList.remove("hidden");
                     document.getElementById("addStockBox").classList.remove("hidden");
                 } else {
                     document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
                     document.getElementById("adminProductSection").classList.add("hidden");
+                    document.getElementById("adminToolSection").classList.add("hidden");
                     document.getElementById("addStockBox").classList.add("hidden");
                 }
 
@@ -706,13 +717,12 @@
             toolTableHtml += `<tr>
                 <td><b>${tool.id}</b></td>
                 <td>${tool.name}</td>
-                <td>${tool.stock}</td>
+                <td><b>${tool.stock || 1}</b></td>
                 <td><span class="badge-stock ${badgeClass}">${tool.status}</span></td>
             </tr>`;
 
-            // แยกตัวเลือกใน Dropdown ตามสถานะของเครื่องมือ
             if (tool.status === "พร้อมใช้งาน") {
-                borrowOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
+                borrowOpts += `<option value="${tool.id}">${tool.id} - ${tool.name} (คงเหลือ: ${tool.stock || 1})</option>`;
             }
             if (tool.status === "กำลังยืม") {
                 returnOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
@@ -727,7 +737,6 @@
 
         document.getElementById("toolStockTable").innerHTML = toolTableHtml || `<tr><td colspan="4">ไม่พบข้อมูลเครื่องมือช่าง</td></tr>`;
         
-        // กำหนดค่า Dropdown แยกฟอร์มอย่างชัดเจน
         document.getElementById("borrowToolSelect").innerHTML = borrowOpts || `<option value="">ไม่มีเครื่องมือที่พร้อมยืม</option>`;
         document.getElementById("returnToolSelect").innerHTML = returnOpts || `<option value="">ไม่มีเครื่องมือที่กำลังถูกยืม</option>`;
         document.getElementById("brokenToolSelect").innerHTML = brokenOpts || `<option value="">ไม่พบเครื่องมือ</option>`;
@@ -841,6 +850,28 @@
                 document.getElementById("newProdStock").value = "0";
                 loadData();
             } else { alert(result.message); }
+        });
+    }
+
+    function addNewTool() {
+        let id = document.getElementById("newToolId").value.trim();
+        let name = document.getElementById("newToolName").value.trim();
+        let stock = document.getElementById("newToolStock").value;
+        if (!id || !name) { alert("กรุณากรอกรหัสและชื่อเครื่องมือ"); return; }
+
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "addTool", id: id, name: name, stock: stock, status: "พร้อมใช้งาน" })
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.status === "success") {
+                alert("เพิ่มเครื่องมือช่างสำเร็จ!");
+                document.getElementById("newToolId").value = "";
+                document.getElementById("newToolName").value = "";
+                document.getElementById("newToolStock").value = "1";
+                loadData();
+            } else { alert(result.message || "เกิดข้อผิดพลาด"); }
         });
     }
 
