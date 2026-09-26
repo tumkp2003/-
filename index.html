@@ -498,15 +498,22 @@
                 <button class="btn-reduce" onclick="submitToolBroken()" style="margin-top: 12px; background: var(--danger);">ส่งแจ้งซ่อม / ชำรุด</button>
             </div>
 
-            <!-- ตารางรายการเครื่องมือช่างทั้งหมด -->
+            <!-- ตารางรายการเครื่องมือช่างทั้งหมด (อัปเดตเป็น 6 คอลัมน์) -->
             <div class="section-box">
                 <h3 style="margin-top: 0;">📋 รายการเครื่องมือช่างและสถานะปัจจุบัน</h3>
                 <table>
                     <thead>
-                        <tr><th>รหัสเครื่องมือ</th><th>ชื่อเครื่องมือ</th><th>จำนวน (Stock)</th><th>สถานะ</th></tr>
+                        <tr>
+                            <th>รหัสเครื่องมือ</th>
+                            <th>ชื่อเครื่องมือ</th>
+                            <th>จำนวนทั้งหมด</th>
+                            <th>ยืมไปแล้ว</th>
+                            <th>เหลือในสต็อก</th>
+                            <th>สถานะ</th>
+                        </tr>
                     </thead>
                     <tbody id="toolStockTable">
-                        <tr><td colspan="4">กำลังโหลดข้อมูล...</td></tr>
+                        <tr><td colspan="6">กำลังโหลดข้อมูล...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -530,7 +537,7 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwxL0cl_V8Ne_HHSYpqu-cZSneUvkYM6Wkoe1eVtUT7aJ2O549aNRH7zRGFPhMfLXvG4A/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwtIqVhzSpeKh_jMbyN5Ewyvvvq6fuiIB8g9j8y6u3U29-_CFrj5XC_X-UjsRwDoimSUA/exec";
     let currentUserRole = "";
     let currentUserName = "";
     let currentUsernameId = "";
@@ -714,18 +721,22 @@
             else brokenTools++;
 
             let badgeClass = (tool.status === "พร้อมใช้งาน") ? "badge-normal" : "badge-out";
+            
+            // แสดงผลคอลัมน์ใหม่: Total, Borrowed, Remaining
             toolTableHtml += `<tr>
                 <td><b>${tool.id}</b></td>
                 <td>${tool.name}</td>
-                <td><b>${tool.stock || 1}</b></td>
+                <td>${tool.total || 0}</td>
+                <td>${tool.borrowed || 0}</td>
+                <td><b>${tool.remaining || 0}</b></td>
                 <td><span class="badge-stock ${badgeClass}">${tool.status}</span></td>
             </tr>`;
 
-            if (tool.status === "พร้อมใช้งาน") {
-                borrowOpts += `<option value="${tool.id}">${tool.id} - ${tool.name} (คงเหลือ: ${tool.stock || 1})</option>`;
+            if (tool.status === "พร้อมใช้งาน" || (tool.remaining && tool.remaining > 0)) {
+                borrowOpts += `<option value="${tool.id}">${tool.id} - ${tool.name} (เหลือ: ${tool.remaining || 0})</option>`;
             }
-            if (tool.status === "กำลังยืม") {
-                returnOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
+            if (tool.borrowed && tool.borrowed > 0) {
+                returnOpts += `<option value="${tool.id}">${tool.id} - ${tool.name} (ค้างยืม: ${tool.borrowed})</option>`;
             }
             brokenOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
         });
@@ -735,7 +746,7 @@
         document.getElementById("toolStatBorrow").innerText = borrowTools;
         document.getElementById("toolStatBroken").innerText = brokenTools;
 
-        document.getElementById("toolStockTable").innerHTML = toolTableHtml || `<tr><td colspan="4">ไม่พบข้อมูลเครื่องมือช่าง</td></tr>`;
+        document.getElementById("toolStockTable").innerHTML = toolTableHtml || `<tr><td colspan="6">ไม่พบข้อมูลเครื่องมือช่าง</td></tr>`;
         
         document.getElementById("borrowToolSelect").innerHTML = borrowOpts || `<option value="">ไม่มีเครื่องมือที่พร้อมยืม</option>`;
         document.getElementById("returnToolSelect").innerHTML = returnOpts || `<option value="">ไม่มีเครื่องมือที่กำลังถูกยืม</option>`;
@@ -749,7 +760,7 @@
                     <td>${h.user}</td>
                     <td><b>${h.id}</b></td>
                     <td>${h.name}</td>
-                    <td style="font-weight:bold; color:${h.action.includes('ยืม') ? 'var(--primary)' : (h.action.includes('แจ้งซ่อม') ? 'var(--danger)' : 'var(--success)')}">${h.action}</td>
+                    <td style="font-weight:bold; color:${h.action.includes('ยืม') ? 'var(--primary)' : (h.action.includes('แจ้งซ่อม') ? 'var(--danger)')}">${h.action}</td>
                     <td>${h.note || '-'}</td>
                 </tr>`;
             });
@@ -919,7 +930,7 @@
                 document.getElementById("borrowNote").value = "";
                 document.getElementById("returnNote").value = "";
                 loadData();
-            } else { alert("เกิดข้อผิดพลาด"); }
+            } else { alert(result.message || "เกิดข้อผิดพลาด"); }
         }).catch(() => {
             alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
         });
@@ -943,7 +954,7 @@
                 alert(`ส่งแจ้งซ่อมสำเร็จ: อาการ ${desc}`);
                 document.getElementById("brokenDesc").value = "";
                 loadData();
-            } else { alert("เกิดข้อผิดพลาด"); }
+            } else { alert(result.message || "เกิดข้อผิดพลาด"); }
         }).catch(() => {
             alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
         });
