@@ -78,7 +78,6 @@
             color: #64748b;
         }
 
-        /* เมนูสลับหมวดหมู่หลัก (Tabs) */
         .main-nav-tabs {
             display: flex;
             gap: 10px;
@@ -110,7 +109,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        /* 📊 Dashboard Analytics Summary Cards */
         .analytics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -450,35 +448,45 @@
                 </div>
             </div>
 
-            <!-- ฟอร์มยืม-คืน / แจ้งปัญหาเครื่องมือ -->
+            <!-- ฟอร์มแยกช่อง "ยืมเครื่องมือ" และ "คืนเครื่องมือ" ออกจากกัน -->
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <!-- ฟอร์มยืมเครื่องมือ -->
                 <div class="section-box" style="flex:1; min-width: 280px; border-left: 5px solid var(--primary);">
-                    <h3 style="color: var(--primary);">🔄 ยืม - คืน เครื่องมือช่าง</h3>
-                    <div class="input-group"><label>เลือกเครื่องมือ:</label>
+                    <h3 style="color: var(--primary);">📤 ยืมเครื่องมือช่าง</h3>
+                    <div class="input-group"><label>เลือกเครื่องมือ (พร้อมใช้งาน):</label>
                         <select id="borrowToolSelect">
-                            <option value="">กำลังโหลดรายการเครื่องมือ...</option>
-                        </select>
-                    </div>
-                    <div class="input-group"><label>สถานะการทำรายการ:</label>
-                        <select id="borrowActionType">
-                            <option value="ยืมเครื่องมือ">ยืมเครื่องมือไปใช้งาน</option>
-                            <option value="คืนเครื่องมือ">คืนเครื่องมือเข้าคลัง</option>
+                            <option value="">กำลังโหลด...</option>
                         </select>
                     </div>
                     <div class="input-group"><label>หมายเหตุ / หน้างาน:</label><input type="text" id="borrowNote" placeholder="ระบุสถานที่ใช้งานหรือโครงการ"></div>
-                    <button class="btn-member" onclick="submitToolBorrow()" style="margin-top: 5px;">ยืนยันทำรายการยืม-คืน</button>
+                    <button class="btn-member" onclick="submitToolAction('ยืมเครื่องมือ')" style="margin-top: 5px;">ยืนยันการยืม</button>
                 </div>
 
-                <div class="section-box" style="flex:1; min-width: 280px; border-left: 5px solid var(--danger);">
-                    <h3 style="color: #danger;">⚠️ แจ้งปัญหาเครื่องมือชำรุด</h3>
-                    <div class="input-group"><label>เลือกเครื่องมือที่มีปัญหา:</label>
-                        <select id="brokenToolSelect">
-                            <option value="">กำลังโหลดรายการเครื่องมือ...</option>
+                <!-- ฟอร์มคืนเครื่องมือ -->
+                <div class="section-box" style="flex:1; min-width: 280px; border-left: 5px solid var(--success);">
+                    <h3 style="color: var(--success);">📥 คืนเครื่องมือช่าง</h3>
+                    <div class="input-group"><label>เลือกเครื่องมือ (กำลังยืม):</label>
+                        <select id="returnToolSelect">
+                            <option value="">กำลังโหลด...</option>
                         </select>
                     </div>
-                    <div class="input-group"><label>รายละเอียดอาการชำรุด:</label><input type="text" id="brokenDesc" placeholder="ระบุอาการเสีย / ความเสียหาย"></div>
-                    <button class="btn-reduce" onclick="submitToolBroken()" style="margin-top: 5px; background: var(--danger);">ส่งแจ้งซ่อม / ชำรุด</button>
+                    <div class="input-group"><label>หมายเหตุ / สภาพเครื่องมือตอนคืน:</label><input type="text" id="returnNote" placeholder="ระบุสภาพเครื่องมือ"></div>
+                    <button class="btn-add" onclick="submitToolAction('คืนเครื่องมือ')" style="margin-top: 5px;">ยืนยันการคืน</button>
                 </div>
+            </div>
+
+            <!-- ฟอร์มแจ้งซ่อมแยกต่างหาก -->
+            <div class="section-box" style="border-left: 5px solid var(--danger);">
+                <h3 style="color: var(--danger);">⚠️ แจ้งปัญหาเครื่องมือชำรุด / ส่งซ่อม</h3>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div class="input-group" style="flex:1; margin-bottom:0;"><label>เลือกเครื่องมือที่มีปัญหา:</label>
+                        <select id="brokenToolSelect">
+                            <option value="">กำลังโหลด...</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex:1; margin-bottom:0;"><label>รายละเอียดอาการชำรุด:</label><input type="text" id="brokenDesc" placeholder="ระบุอาการเสีย / ความเสียหาย"></div>
+                </div>
+                <button class="btn-reduce" onclick="submitToolBroken()" style="margin-top: 12px; background: var(--danger);">ส่งแจ้งซ่อม / ชำรุด</button>
             </div>
 
             <!-- ตารางรายการเครื่องมือช่างทั้งหมด -->
@@ -513,7 +521,7 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyD4IM9a6kKxiOxSeE8pnIpxu_45g-y69n2FjFcwJ7j7QQPksEzQq6tj66BmClX67H81Q/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwAh-bpERCpREvJVQ0_RNGxFDyJXGa9RW1X7L30jzGAgFo0Zh35-ldJ8aH4tnIjkCgKSQ/exec";
     let currentUserRole = "";
     let currentUserName = "";
     let currentUsernameId = "";
@@ -663,7 +671,6 @@
         });
     }
 
-    // 📊 คำนวณและอัปเดตตัวเลขการ์ด Dashboard
     function updateAnalyticsDashboard() {
         let totalItems = globalStockData.length;
         let lowOrOutCount = 0;
@@ -686,21 +693,31 @@
         let brokenTools = 0;
 
         let toolTableHtml = "";
-        let selectOptionsHtml = "";
+        let borrowOpts = "";
+        let returnOpts = "";
+        let brokenOpts = "";
 
         globalToolsData.forEach(tool => {
             if (tool.status === "พร้อมใช้งาน") readyTools++;
             else if (tool.status === "กำลังยืม") borrowTools++;
             else brokenTools++;
 
+            let badgeClass = (tool.status === "พร้อมใช้งาน") ? "badge-normal" : "badge-out";
             toolTableHtml += `<tr>
                 <td><b>${tool.id}</b></td>
                 <td>${tool.name}</td>
                 <td>${tool.stock}</td>
-                <td><span class="badge-stock ${tool.status === 'พร้อมใช้งาน' ? 'badge-normal' : 'badge-out'}">${tool.status}</span></td>
+                <td><span class="badge-stock ${badgeClass}">${tool.status}</span></td>
             </tr>`;
 
-            selectOptionsHtml += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
+            // แยกตัวเลือกใน Dropdown ตามสถานะของเครื่องมือ
+            if (tool.status === "พร้อมใช้งาน") {
+                borrowOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
+            }
+            if (tool.status === "กำลังยืม") {
+                returnOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
+            }
+            brokenOpts += `<option value="${tool.id}">${tool.id} - ${tool.name}</option>`;
         });
 
         document.getElementById("toolStatTotal").innerText = totalTools;
@@ -709,10 +726,12 @@
         document.getElementById("toolStatBroken").innerText = brokenTools;
 
         document.getElementById("toolStockTable").innerHTML = toolTableHtml || `<tr><td colspan="4">ไม่พบข้อมูลเครื่องมือช่าง</td></tr>`;
-        document.getElementById("borrowToolSelect").innerHTML = selectOptionsHtml;
-        document.getElementById("brokenToolSelect").innerHTML = selectOptionsHtml;
+        
+        // กำหนดค่า Dropdown แยกฟอร์มอย่างชัดเจน
+        document.getElementById("borrowToolSelect").innerHTML = borrowOpts || `<option value="">ไม่มีเครื่องมือที่พร้อมยืม</option>`;
+        document.getElementById("returnToolSelect").innerHTML = returnOpts || `<option value="">ไม่มีเครื่องมือที่กำลังถูกยืม</option>`;
+        document.getElementById("brokenToolSelect").innerHTML = brokenOpts || `<option value="">ไม่พบเครื่องมือ</option>`;
 
-        // Render Tools History
         let histHtml = "";
         if (globalToolsHistory.length > 0) {
             globalToolsHistory.slice().reverse().forEach(h => {
@@ -850,23 +869,26 @@
         });
     }
 
-    function submitToolBorrow() {
-        let toolId = document.getElementById("borrowToolSelect").value;
-        let action = document.getElementById("borrowActionType").value;
-        let note = document.getElementById("borrowNote").value.trim();
-        
+    function submitToolAction(actionType) {
+        let toolId = document.getElementById(actionType === 'ยืมเครื่องมือ' ? "borrowToolSelect" : "returnToolSelect").value;
+        let note = document.getElementById(actionType === 'ยืมเครื่องมือ' ? "borrowNote" : "returnNote").value.trim();
+        if (!toolId) { alert("กรุณาเลือกเครื่องมือ"); return; }
+
         let selectedTool = globalToolsData.find(t => t.id === toolId);
         let toolName = selectedTool ? selectedTool.name : toolId;
 
         fetch(WEB_APP_URL, {
             method: "POST",
-            body: JSON.stringify({ action: "toolAction", userName: currentUserName, toolId: toolId, toolName: toolName, actionType: action, note: note })
+            body: JSON.stringify({ action: "toolAction", userName: currentUserName, toolId: toolId, toolName: toolName, actionType: actionType, note: note })
         })
         .then(res => res.json())
         .then(result => {
-            alert(`บันทึกข้อมูลสำเร็จ: ทำรายการ ${action} เรียบร้อยแล้ว`);
-            document.getElementById("borrowNote").value = "";
-            loadData();
+            if (result.status === "success") {
+                alert(`บันทึกรายการ "${actionType}" สำเร็จ!`);
+                document.getElementById("borrowNote").value = "";
+                document.getElementById("returnNote").value = "";
+                loadData();
+            } else { alert("เกิดข้อผิดพลาด"); }
         }).catch(() => {
             alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
         });
@@ -886,9 +908,11 @@
         })
         .then(res => res.json())
         .then(result => {
-            alert(`ส่งแจ้งซ่อมสำเร็จ: อาการ ${desc}`);
-            document.getElementById("brokenDesc").value = "";
-            loadData();
+            if (result.status === "success") {
+                alert(`ส่งแจ้งซ่อมสำเร็จ: อาการ ${desc}`);
+                document.getElementById("brokenDesc").value = "";
+                loadData();
+            } else { alert("เกิดข้อผิดพลาด"); }
         }).catch(() => {
             alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
         });
